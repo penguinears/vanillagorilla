@@ -21,7 +21,6 @@
       display: block;
     }
 
-    /* INTRO */
     #scene {
       position: relative;
       width: 100vw;
@@ -30,6 +29,7 @@
       overflow: hidden;
     }
 
+    /* INTRO */
     #gorillaIntro {
       position: absolute;
       width: 300px;
@@ -92,7 +92,7 @@
       overflow: hidden;
       display: none;
       background: #3aa0ff; /* blue sky */
-      z-index: 2;
+      z-index: 3;
     }
 
     #gameWorld {
@@ -117,15 +117,6 @@
       z-index: 2;
     }
 
-    #ground {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 120px;
-      background: #2ecc40; /* green ground */
-      z-index: 1;
-    }
-
     #score {
       position: absolute;
       top: 15px;
@@ -137,7 +128,7 @@
       z-index: 4;
     }
 
-    /* DEATH SCREEN */
+    /* DEATH SCREEN (below, with green ground) */
     #deathScreen {
       position: absolute;
       inset: 0;
@@ -153,6 +144,7 @@
       text-align: center;
       color: #fff;
       margin-bottom: 20px;
+      z-index: 2;
     }
     #deathText h1 {
       font-size: 3rem;
@@ -167,6 +159,16 @@
       width: 350px;
       height: auto;
       margin-top: 20px;
+      z-index: 2;
+    }
+
+    #deathGround {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 140px;
+      background: #2ecc40; /* green ground only on death screen */
+      z-index: 1;
     }
   </style>
 </head>
@@ -186,11 +188,10 @@
       <div id="gameWorld">
         <div id="score">Score: 0</div>
         <img id="player" src="images/gor2-removebg-preview.png" />
-        <div id="ground"></div>
       </div>
     </div>
 
-    <!-- DEATH SCREEN -->
+    <!-- DEATH SCREEN (below, revealed by scroll) -->
     <div id="deathScreen">
       <div id="deathText">
         <h1>YOU DIED</h1>
@@ -198,6 +199,7 @@
         <p id="bestScoreLine">Best Score: 0</p>
       </div>
       <img id="deathImage" src="images/dead_gor-removebg-preview.png" />
+      <div id="deathGround"></div>
     </div>
 
   </div>
@@ -243,18 +245,22 @@
     /* GAMEPLAY */
     let y = window.innerHeight / 2;
     let velocity = 0;
-    let gravity = 0.6;
-    const flapStrength = -11;
+    let gravity = 0.45;          // softer gravity
+    const flapStrength = -10;    // strong but not insane
     let started = false;
     let running = false;
     let planes = [];
     let planeSpawnTimer = 0;
     let score = 0;
     let scoreTimer = 0;
+    let safeFrames = 0;          // grace period
     let bestScore = parseInt(localStorage.getItem("vg_best_score") || "0", 10);
 
     function startGameplay() {
       gameLayer.style.display = "block";
+      gameLayer.style.background = "#3aa0ff";
+      deathScreen.style.display = "none";
+
       running = true;
       started = false;
       y = window.innerHeight / 2;
@@ -263,10 +269,13 @@
       planeSpawnTimer = 0;
       score = 0;
       scoreTimer = 0;
+      safeFrames = 0;
 
       player.src = "images/gor2-removebg-preview.png";
       player.style.top = y + "px";
+      player.style.transform = "translateY(-50%) rotate(0deg)";
       gameWorld.style.transform = "translateY(0)";
+      gameWorld.style.transition = "transform 0s";
 
       document.addEventListener("keydown", input);
       document.addEventListener("mousedown", input);
@@ -289,11 +298,11 @@
       plane.src = "images/plane-removebg-preview.png";
       plane.className = "plane";
 
-      const minY = 40;
-      const maxY = window.innerHeight - 200;
+      const minY = 60;
+      const maxY = window.innerHeight - 220;
       plane.style.top = (Math.random() * (maxY - minY) + minY) + "px";
       plane.style.left = window.innerWidth + "px";
-      plane.dataset.speed = (3 + Math.random() * 3).toString();
+      plane.dataset.speed = (2.5 + Math.random() * 2.5).toString(); // slightly slower
 
       gameWorld.appendChild(plane);
       planes.push(plane);
@@ -308,13 +317,16 @@
     function gameLoop() {
       if (!running) return;
 
+      safeFrames++;
+
       if (started) {
         velocity += gravity;
         y += velocity;
       }
 
-      const floor = window.innerHeight - 120;
-      if (y > floor) {
+      const floor = window.innerHeight - 40; // a bit lower, more forgiving
+
+      if (started && safeFrames > 40 && y > floor) {
         y = floor;
         triggerDeath();
         return;
@@ -328,13 +340,16 @@
       player.style.top = y + "px";
 
       let angle = velocity * 2;
-      angle = Math.max(-40, Math.min(40, angle));
+      angle = Math.max(-35, Math.min(35, angle));
       player.style.transform = `translateY(-50%) rotate(${angle}deg)`;
 
-      planeSpawnTimer++;
-      if (planeSpawnTimer > 90) {
-        planeSpawnTimer = 0;
-        spawnPlane();
+      // planes only after some time
+      if (safeFrames > 120) {
+        planeSpawnTimer++;
+        if (planeSpawnTimer > 90) {
+          planeSpawnTimer = 0;
+          spawnPlane();
+        }
       }
 
       planes.forEach((plane, i) => {
@@ -348,15 +363,17 @@
         }
       });
 
-      for (let p of planes) {
-        if (rectsOverlap(player, p)) {
-          triggerDeath();
-          return;
+      if (safeFrames > 80) {
+        for (let p of planes) {
+          if (rectsOverlap(player, p)) {
+            triggerDeath();
+            return;
+          }
         }
       }
 
       scoreTimer++;
-      if (scoreTimer >= 10) {
+      if (scoreTimer >= 12) {
         scoreTimer = 0;
         score++;
         scoreEl.textContent = "Score: " + score;
@@ -375,7 +392,7 @@
       player.src = "images/gor3-removebg-preview.png";
 
       let deathVel = 0;
-      let deathGrav = 1.2;
+      let deathGrav = 1.0;
 
       function fall() {
         deathVel += deathGrav;
@@ -397,9 +414,6 @@
     }
 
     function scrollWorldDown() {
-      gameWorld.style.transition = "transform 2s ease-in";
-      gameWorld.style.transform = "translateY(100vh)";
-
       if (score > bestScore) {
         bestScore = score;
         localStorage.setItem("vg_best_score", bestScore);
@@ -408,9 +422,17 @@
       scoreLine.textContent = "Score: " + score;
       bestScoreLine.textContent = "Best Score: " + bestScore;
 
+      // show death screen behind, make gameLayer transparent
+      deathScreen.style.display = "flex";
+      deathScreen.style.zIndex = 1;
+      gameLayer.style.background = "transparent";
+
+      // move world UP so it feels like camera goes DOWN to death screen
+      gameWorld.style.transition = "transform 2s ease-in";
+      gameWorld.style.transform = "translateY(-100vh)";
+
       setTimeout(() => {
         gameLayer.style.display = "none";
-        deathScreen.style.display = "flex";
       }, 2000);
     }
   </script>
