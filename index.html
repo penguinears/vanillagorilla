@@ -19,16 +19,15 @@ img{
   pointer-events:none;
 }
 
-/* SCENE — BLUE SKY NOW */
 #scene{
   position:relative;
   width:100vw;
   height:100vh;
   overflow:hidden;
-  background:#3aa0ff; /* BLUE SKY */
+  background:#3aa0ff;
 }
 
-/* INTRO */
+/* Intro */
 #gorillaIntro{
   position:absolute;
   width:260px;
@@ -64,7 +63,7 @@ img{
 #overlay{
   position:absolute;
   inset:0;
-  background:#000; /* fades to black only during story */
+  background:#000;
   opacity:0;
   display:flex;
   align-items:center;
@@ -93,7 +92,7 @@ img{
   z-index:6;
 }
 
-/* GAME LAYER */
+/* Game layer */
 #gameLayer{
   position:absolute;
   inset:0;
@@ -103,7 +102,7 @@ img{
   z-index:3;
 }
 
-/* STACK: GAME WORLD + DEATH SCREEN */
+/* World stack */
 #worldStack{
   position:absolute;
   left:0;
@@ -113,7 +112,7 @@ img{
   transition:transform 0s;
 }
 
-/* GAME WORLD */
+/* Game world */
 #gameWorld{
   position:absolute;
   left:0;
@@ -145,7 +144,7 @@ img{
   z-index:5;
 }
 
-/* DEATH SCREEN */
+/* Death screen */
 #deathScreen{
   position:absolute;
   left:0;
@@ -162,7 +161,7 @@ img{
   bottom:0;
   left:0;
   width:100%;
-  height:250px;
+  height:400px; /* tall enough so gorilla never touches blue */
   background:#2ecc40;
   z-index:1;
 }
@@ -170,7 +169,7 @@ img{
   width:520px;
   height:auto;
   position:absolute;
-  bottom:210px; /* FIXED — sits ON grass */
+  bottom:400px; /* entire image over grass */
   left:50%;
   transform:translateX(-50%);
   z-index:2;
@@ -227,7 +226,6 @@ img{
 </div>
 
 <script>
-/* INTRO */
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
 const skipBtn=document.getElementById("skipBtn");
@@ -268,7 +266,6 @@ skipBtn.onclick=()=>{
   startGameplay();
 };
 
-/* GAMEPLAY */
 const gameLayer=document.getElementById("gameLayer");
 const worldStack=document.getElementById("worldStack");
 const gameWorld=document.getElementById("gameWorld");
@@ -302,7 +299,6 @@ function startGameplay(){
   y=window.innerHeight/2;
   velocity=0;
 
-  /* FIX: remove leftover planes */
   planes.forEach(p=>p.remove());
   planes=[];
   planeSpawnTimer=0;
@@ -315,7 +311,7 @@ function startGameplay(){
   player.src="images/gor2-removebg-preview.png";
   player.style.top=y+"px";
   player.style.transform="translateY(-50%) rotate(0deg)";
-  player.style.display="block"; /* FIX: show player again */
+  player.style.display="block";
   scoreEl.textContent="Score: 0";
 
   document.addEventListener("keydown",input);
@@ -335,7 +331,8 @@ function flap(){
 }
 
 function spawnPlane(){
-  if(planes.length>=3)return;
+  let maxPlanes=Math.min(8,3+Math.floor(safeFrames/300));
+  if(planes.length>=maxPlanes)return;
 
   const plane=document.createElement("img");
   plane.src="images/plane-removebg-preview.png";
@@ -343,8 +340,17 @@ function spawnPlane(){
 
   const minY=70;
   const maxY=window.innerHeight-230;
-  plane.style.top=(Math.random()*(maxY-minY)+minY)+"px";
+  let yPos=(Math.random()*(maxY-minY)+minY);
+  plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
+
+  const lastPlane=planes[planes.length-1];
+  if(lastPlane){
+    const lastY=parseFloat(lastPlane.style.top);
+    if(Math.abs(yPos-lastY)<160){
+      plane.style.top=(yPos+200)+"px";
+    }
+  }
 
   let speedBase=0.9;
   let speedScale=Math.min(1.2,safeFrames/600);
@@ -432,7 +438,6 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-/* DEATH */
 function triggerDeath(){
   if(!running)return;
   running=false;
@@ -475,7 +480,7 @@ function startScrollDown(){
   scoreLine.textContent="Score: "+score;
   bestScoreLine.textContent="Best Score: "+bestScore;
 
-  player.style.display="none"; /* FIX: hide tiny gorilla */
+  player.style.display="none";
 
   worldStack.style.transition="transform 2s ease-in";
   worldStack.style.transform="translateY(-100vh)";
