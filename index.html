@@ -159,13 +159,23 @@ scoreLine.textContent="Score: "+score;bestScoreLine.textContent="Best Score: "+b
 player.style.display="none";worldStack.style.transition="transform 2s ease-in";worldStack.style.transform="translateY(-100vh)";
 }
 
-// RESTART BUTTON
+// RESTART BUTTON FIXED
 restartBtn.onclick = () => {
-worldStack.style.transition = "none";
-worldStack.style.transform = "translateY(0)";
-planes.forEach(p=>p.remove()); planes=[];
-startGameplay();
-setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);
+  // Scroll world back down first
+  worldStack.style.transition = "transform 1s ease-out";
+  worldStack.style.transform = "translateY(0)";
+
+  // After scroll, reset game
+  setTimeout(() => {
+    planes.forEach(p => p.remove()); planes=[];
+    y = window.innerHeight/2; velocity=0; started=false; running=true;
+    score=0; scoreTimer=0; safeFrames=0; lives=3; updateHearts();
+    scoreEl.textContent="Score: 0";
+    player.style.top=y+"px"; player.style.transform="translateY(-50%) rotate(0deg)";
+    player.style.display="block";
+    requestAnimationFrame(gameLoop);
+    setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);
+  },1000);
 }
 
 // INIT
