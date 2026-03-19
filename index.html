@@ -34,34 +34,39 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 </head>
 <body>
 <div id="scene">
-<img id="gorillaIntro" src="images/gor1-removebg-preview.png">
-<div id="vanillaText">VANILLA GORILLA</div>
-<div id="overlay"><div id="storyText"></div></div>
-<button id="skipBtn">Skip cutscene</button>
-<div id="gameLayer">
-<div id="worldStack">
-<div id="gameWorld">
-<div id="score">Score: 0</div>
-<div id="hearts">❤️❤️❤️</div>
-<img id="player" src="images/gor2-removebg-preview.png">
-</div>
-<div id="deathScreen">
-<div id="deathText">
-<h1>YOU DIED</h1>
-<p id="scoreLine">Score: 0</p>
-<p id="bestScoreLine">Best Score: 0</p>
-<button id="restartBtn">Go again</button>
-</div>
-<div id="deathGround"></div>
-</div>
-</div>
-</div>
+  <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
+  <div id="vanillaText">VANILLA GORILLA</div>
+
+  <div id="overlay"><div id="storyText"></div></div>
+  <button id="skipBtn">Skip cutscene</button>
+
+  <div id="gameLayer">
+    <div id="worldStack">
+      <div id="gameWorld">
+        <div id="score">Score: 0</div>
+        <div id="hearts">❤️❤️❤️</div>
+        <img id="player" src="images/gor2-removebg-preview.png">
+      </div>
+
+      <div id="deathScreen">
+        <div id="deathText">
+          <h1>YOU DIED</h1>
+          <p id="scoreLine">Score: 0</p>
+          <p id="bestScoreLine">Best Score: 0</p>
+          <button id="restartBtn">Go again</button>
+        </div>
+        <div id="deathGround"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
 const skipBtn=document.getElementById("skipBtn");
+const gorillaIntro=document.getElementById("gorillaIntro");
+const vanillaText=document.getElementById("vanillaText");
 const gameLayer=document.getElementById("gameLayer");
 const worldStack=document.getElementById("worldStack");
 const gameWorld=document.getElementById("gameWorld");
@@ -81,18 +86,6 @@ let started=false,running=false;
 let planes=[];
 let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
-let seenStory=localStorage.getItem("vg_seen_intro");
-
-// STORY
-function fadeStory(t){storyText.style.opacity="0";setTimeout(()=>{storyText.textContent=t;storyText.style.opacity="1";},250);}
-function playStory(){
-overlay.style.display="flex"; overlay.style.opacity="1";
-setTimeout(()=>fadeStory("The year is 2067 — 80 years since Hitler won the war."),1000);
-setTimeout(()=>fadeStory("You are the British Rebellion’s last hope."),4000);
-setTimeout(()=>{overlay.style.opacity="0";setTimeout(()=>{overlay.style.display="none";startGameplay();},800);},7000);
-localStorage.setItem("vg_seen_intro","1");
-}
-skipBtn.onclick=()=>{overlay.style.display="none"; skipBtn.style.display="none"; startGameplay();};
 
 // INPUT
 document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp") flap();});
@@ -110,28 +103,19 @@ function spawnPlane() {
     const plane = document.createElement("img");
     plane.src = "images/plane-removebg-preview.png";
     plane.className = "plane";
-
     const minY = 50;
     const maxY = window.innerHeight - 230;
     let yPos = Math.random() * (maxY - minY) + minY;
-
-    if (planes.length > 0) {
-        const lastPlane = parseFloat(planes[planes.length - 1].style.top);
-        if (Math.abs(yPos - lastPlane) < 160) yPos += 160;
-        if (yPos > maxY) yPos = maxY;
-    }
-
-    plane.style.top = yPos + "px";
-    plane.style.left = window.innerWidth + "px";
-    plane.dataset.speed = (0.9 + Math.random() * 0.6 + Math.min(1.2, safeFrames / 600));
-
+    if (planes.length > 0){const lastPlane = parseFloat(planes[planes.length - 1].style.top); if(Math.abs(yPos-lastPlane)<160)yPos+=160;if(yPos>maxY)yPos=maxY;}
+    plane.style.top=yPos+"px"; plane.style.left=window.innerWidth+"px";
+    plane.dataset.speed=(0.9+Math.random()*0.6+Math.min(1.2,safeFrames/600));
     gameWorld.appendChild(plane);
     planes.push(plane);
 }
 
 // COLLISION
 function hit(a,b){const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();const shrink=28;return!(ar.right-shrink<br.left+shrink||ar.left+shrink>br.right-shrink||ar.bottom-shrink<br.top+shrink||ar.top+shrink>br.bottom-shrink);}
-function shake(){document.body.style.transform="translate(6px)"; setTimeout(()=>document.body.style.transform="translate(-6px)",50); setTimeout(()=>document.body.style.transform="translate(0)",100);}
+function shake(){document.body.style.transform="translate(6px)";setTimeout(()=>document.body.style.transform="translate(-6px)",50);setTimeout(()=>document.body.style.transform="translate(0)",100);}
 
 // GAME LOOP
 function gameLoop(){
@@ -173,24 +157,16 @@ scoreLine.textContent="Score: "+score;bestScoreLine.textContent="Best Score: "+b
 player.style.display="none";worldStack.style.transition="transform 2s ease-in";worldStack.style.transform="translateY(-100vh)";
 }
 
-// RESTART BUTTON FIXED
+// RESTART BUTTON
 restartBtn.onclick = () => {
-  worldStack.style.transition = "transform 1s ease-out";
-  worldStack.style.transform = "translateY(0)";
-  setTimeout(() => {
-    planes.forEach(p => p.remove()); planes=[];
-    y = window.innerHeight/2; velocity=0; started=false; running=true;
-    score=0; scoreTimer=0; safeFrames=0; lives=3; updateHearts();
-    scoreEl.textContent="Score: 0";
-    player.style.top=y+"px"; player.style.transform="translateY(-50%) rotate(0deg)";
-    player.style.display="block";
-    requestAnimationFrame(gameLoop);
-    setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);
-  },1000);
+worldStack.style.transition = "transform 1s ease-out";
+worldStack.style.transform = "translateY(0)";
+setTimeout(()=>{planes.forEach(p=>p.remove());planes=[];y=window.innerHeight/2;velocity=0;started=false;running=true;score=0;scoreTimer=0;safeFrames=0;lives=3;updateHearts();scoreEl.textContent="Score: 0";player.style.top=y+"px";player.style.transform="translateY(-50%) rotate(0deg)";player.style.display="block";requestAnimationFrame(gameLoop);setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);},1000);
 }
 
 // INIT
-if(seenStory){startGameplay();} else{playStory();}
+gorillaIntro.style.display="block"; vanillaText.style.display="block";
+setTimeout(()=>startGameplay(), 5000); // show title for 5s before gameplay
 </script>
 </body>
 </html>
