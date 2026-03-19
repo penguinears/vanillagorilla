@@ -2,10 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Vanilla Gorilla Intro + Gameplay</title>
+  <title>Vanilla Gorilla</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: system-ui, sans-serif; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    img {
+      user-select: none;
+      -webkit-user-drag: none;
+      image-rendering: crisp-edges;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
 
     #scene {
       position: relative;
@@ -16,18 +39,18 @@
     }
 
     /* INTRO GORILLA */
-    #gorilla {
+    #gorillaIntro {
       position: absolute;
       width: 300px;
       bottom: -250px;
       left: -250px;
       transform: rotate(25deg);
       opacity: 0;
-      animation: fly 4s ease-out forwards;
+      animation: flyIntro 4s ease-out forwards;
       animation-delay: 0.3s;
     }
 
-    @keyframes fly {
+    @keyframes flyIntro {
       0% { bottom: -250px; left: -250px; opacity: 1; transform: rotate(25deg); }
       50% { opacity: 1; }
       100% { bottom: 100vh; left: 100vw; opacity: 0; transform: rotate(25deg); }
@@ -35,7 +58,8 @@
 
     #vanillaText {
       position: absolute;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
       font-size: 3.5rem;
       letter-spacing: 0.2em;
@@ -62,6 +86,7 @@
       align-items: center;
       justify-content: center;
       transition: opacity 1s ease;
+      z-index: 5;
     }
 
     #storyText {
@@ -74,13 +99,19 @@
       color: #fff;
     }
 
-    /* GAMEPLAY SCREEN */
-    #gameplay {
+    /* GAMEPLAY LAYER */
+    #gameLayer {
       position: absolute;
       inset: 0;
-      background: #3aa0ff; /* blue sky */
-      display: none;
       overflow: hidden;
+      display: none;
+      background: #3aa0ff; /* blue sky */
+      z-index: 1;
+    }
+
+    #gameWorld {
+      position: absolute;
+      inset: 0;
     }
 
     #player {
@@ -89,32 +120,116 @@
       left: 150px;
       top: 50%;
       transform: translateY(-50%) rotate(0deg);
-      transition: transform 0.1s linear;
+      transition: transform 0.08s linear;
+      z-index: 2;
+    }
+
+    .plane {
+      position: absolute;
+      width: 200px;
+      z-index: 1;
+    }
+
+    #score {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 4px rgba(0,0,0,0.6);
+      z-index: 3;
+    }
+
+    /* DEATH SCREEN */
+    #deathScreen {
+      position: absolute;
+      inset: 0;
+      background: #3aa0ff; /* keep blue sky */
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 0;
+    }
+
+    #deathImage {
+      max-width: 60vw;
+      max-height: 60vh;
+      margin-top: 40px;
+    }
+
+    #deathText {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    #deathText h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    #deathText p {
+      font-size: 1.4rem;
+      margin: 4px 0;
+    }
+
+    /* WORLD SCROLL ON DEATH */
+    .world-scroll-up {
+      animation: worldScrollUp 1.5s ease-in forwards;
+    }
+
+    @keyframes worldScrollUp {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100vh); }
     }
   </style>
 </head>
 <body>
   <div id="scene">
-    <img id="gorilla" src="images/gor1-removebg-preview.png" />
+    <!-- Intro -->
+    <img id="gorillaIntro" src="images/gor1-removebg-preview.png" alt="Gorilla Intro" />
     <div id="vanillaText">VANILLA GORILLA</div>
 
     <div id="overlay">
       <div id="storyText"></div>
     </div>
 
-    <!-- GAMEPLAY -->
-    <div id="gameplay">
-      <img id="player" src="images/gor2-removebg-preview.png" />
+    <!-- Gameplay -->
+    <div id="gameLayer">
+      <div id="gameWorld">
+        <div id="score">Score: 0</div>
+        <img id="player" src="images/gor2-removebg-preview.png" alt="Player" />
+      </div>
+    </div>
+
+    <!-- Death Screen (behind, revealed after scroll) -->
+    <div id="deathScreen">
+      <div id="deathText">
+        <h1>YOU DIED</h1>
+        <p id="scoreLine">Score: 0</p>
+        <p id="bestScoreLine">Best Score: 0</p>
+      </div>
+      <img id="deathImage" src="images/dead gor.png" alt="Dead Gorilla" />
     </div>
   </div>
 
   <script>
+    // INTRO + STORY
     const overlay = document.getElementById("overlay");
     const storyText = document.getElementById("storyText");
-    const gameplay = document.getElementById("gameplay");
+    const gameLayer = document.getElementById("gameLayer");
+    const gameWorld = document.getElementById("gameWorld");
     const player = document.getElementById("player");
+    const scoreEl = document.getElementById("score");
+    const deathScreen = document.getElementById("deathScreen");
+    const scoreLine = document.getElementById("scoreLine");
+    const bestScoreLine = document.getElementById("bestScoreLine");
 
-    function showOverlay() { overlay.style.opacity = "1"; }
+    function showOverlay() {
+      overlay.style.opacity = "1";
+    }
 
     function showText(text) {
       storyText.style.opacity = "0";
@@ -124,16 +239,13 @@
       }, 400);
     }
 
-    // TIMINGS
     const blackScreenTime = 4500;
     const firstLineTime = blackScreenTime + 1000;
     const secondLineTime = firstLineTime + 4000;
     const startGameTime = secondLineTime + 4000;
 
-    // Fade to black
     setTimeout(showOverlay, blackScreenTime);
 
-    // Story text
     setTimeout(() => {
       showText("The year is 2067 — 80 years since Hitler won the war.");
     }, firstLineTime);
@@ -142,53 +254,198 @@
       showText("You are the British last hope. Fly past the German army and crash into him to end it.");
     }, secondLineTime);
 
-    // Fade into gameplay
     setTimeout(() => {
       overlay.style.opacity = "0";
       setTimeout(() => {
         overlay.style.display = "none";
-        gameplay.style.display = "block";
-        startGame();
+        startGameplay();
       }, 1000);
     }, startGameTime);
 
-    /* -------------------------
-       FLAPPY BIRD MOVEMENT
-    --------------------------*/
+    // GAMEPLAY
     let y = window.innerHeight / 2;
     let velocity = 0;
-    const gravity = 0.5;
-    const flapStrength = -9;
+    let gravity = 0.6;
+    const flapStrength = -11;
+    let running = false;
+    let planes = [];
+    let planeSpawnTimer = 0;
+    let score = 0;
+    let scoreTimer = 0;
+    let bestScore = parseInt(localStorage.getItem("vg_best_score") || "0", 10);
 
-    function startGame() {
-      document.addEventListener("keydown", flap);
-      document.addEventListener("mousedown", flap);
+    function startGameplay() {
+      gameLayer.style.display = "block";
+      deathScreen.style.display = "flex"; // behind, but under gameLayer
+      deathScreen.style.zIndex = 0;
+      gameLayer.style.zIndex = 2;
+      running = true;
+      y = window.innerHeight / 2;
+      velocity = 0;
+      planes = [];
+      planeSpawnTimer = 0;
+      score = 0;
+      scoreTimer = 0;
+      player.src = "images/gor2-removebg-preview.png";
+      player.style.top = y + "px";
+      player.style.transform = "translateY(-50%) rotate(0deg)";
+      gameWorld.classList.remove("world-scroll-up");
 
-      function gameLoop() {
-        velocity += gravity;
-        y += velocity;
+      document.addEventListener("keydown", handleKey);
+      document.addEventListener("mousedown", handleClick);
 
-        // Keep player on screen
-        if (y < 0) { y = 0; velocity = 0; }
-        if (y > window.innerHeight - 100) { y = window.innerHeight - 100; velocity = 0; }
+      requestAnimationFrame(gameLoop);
+    }
 
+    function handleKey(e) {
+      if (!running) return;
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        flap();
+      }
+    }
+
+    function handleClick() {
+      if (!running) return;
+      flap();
+    }
+
+    function flap() {
+      velocity = flapStrength;
+    }
+
+    function spawnPlane() {
+      const plane = document.createElement("img");
+      plane.src = "images/plane-removebg-preview.png";
+      plane.className = "plane";
+      const planeHeight = 120;
+      const minY = 40;
+      const maxY = window.innerHeight - planeHeight - 80;
+      const top = Math.random() * (maxY - minY) + minY;
+      plane.style.top = top + "px";
+      plane.style.left = window.innerWidth + 100 + "px";
+      plane.dataset.speed = (3 + Math.random() * 3).toString();
+      gameWorld.appendChild(plane);
+      planes.push(plane);
+    }
+
+    function rectsOverlap(a, b) {
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      return !(
+        ar.right < br.left ||
+        ar.left > br.right ||
+        ar.bottom < br.top ||
+        ar.top > br.bottom
+      );
+    }
+
+    function gameLoop(timestamp) {
+      if (!running) return;
+
+      velocity += gravity;
+      y += velocity;
+
+      if (y < 0) {
+        y = 0;
+        velocity = 0;
+      }
+
+      const floor = window.innerHeight - 80;
+      if (y > floor) {
+        y = floor;
+        triggerDeath();
+        return;
+      }
+
+      player.style.top = y + "px";
+
+      let angle = velocity * 2;
+      if (angle > 40) angle = 40;
+      if (angle < -40) angle = -40;
+      player.style.transform = `translateY(-50%) rotate(${angle}deg)`;
+
+      planeSpawnTimer += 1;
+      if (planeSpawnTimer > 90) {
+        planeSpawnTimer = 0;
+        spawnPlane();
+      }
+
+      planes.forEach((plane, index) => {
+        const speed = parseFloat(plane.dataset.speed || "4");
+        const currentLeft = parseFloat(plane.style.left);
+        const newLeft = currentLeft - speed;
+        plane.style.left = newLeft + "px";
+
+        if (newLeft < -300) {
+          plane.remove();
+          planes.splice(index, 1);
+        }
+      });
+
+      for (let i = 0; i < planes.length; i++) {
+        if (rectsOverlap(player, planes[i])) {
+          triggerDeath();
+          return;
+        }
+      }
+
+      scoreTimer += 1;
+      if (scoreTimer >= 10) {
+        scoreTimer = 0;
+        score += 1;
+        scoreEl.textContent = "Score: " + score;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function triggerDeath() {
+      if (!running) return;
+      running = false;
+
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClick);
+
+      player.src = "images/gor3-removebg-preview.png";
+
+      let deathVelocity = 0;
+      let deathGravity = 1.2;
+
+      function deathFall() {
+        deathVelocity += deathGravity;
+        y += deathVelocity;
         player.style.top = y + "px";
 
-        // ROTATION BASED ON VELOCITY
-        let angle = velocity * 2;
-        if (angle > 40) angle = 40;
-        if (angle < -40) angle = -40;
+        let angle = deathVelocity * 2;
+        if (angle > 70) angle = 70;
+        player.style.transform = `translateY(-50%) rotate(${angle}deg)`;
 
-        player.style.transform = `rotate(${angle}deg)`;
-
-        requestAnimationFrame(gameLoop);
+        if (y < window.innerHeight + 200) {
+          requestAnimationFrame(deathFall);
+        } else {
+          startWorldScroll();
+        }
       }
 
-      function flap() {
-        velocity = flapStrength;
+      deathFall();
+    }
+
+    function startWorldScroll() {
+      gameWorld.classList.add("world-scroll-up");
+
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem("vg_best_score", String(bestScore));
       }
 
-      gameLoop();
+      scoreLine.textContent = "Score: " + score;
+      bestScoreLine.textContent = "Best Score: " + bestScore;
+
+      setTimeout(() => {
+        gameLayer.style.display = "none";
+        deathScreen.style.zIndex = 1;
+        deathScreen.style.display = "flex";
+      }, 1500);
     }
   </script>
 </body>
