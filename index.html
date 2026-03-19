@@ -1,37 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vanilla Gorilla</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-*:focus{outline:none;}
+body{background:#000;overflow:hidden;font-family:sans-serif;}
 
-body{
-  background:#000;
-  overflow:hidden;
-  font-family:system-ui,sans-serif;
-  -webkit-tap-highlight-color:transparent;
-}
+#scene{width:100vw;height:100vh;background:#3aa0ff;position:relative;overflow:hidden;}
 
-img{
-  user-select:none;
-  -webkit-user-drag:none;
-  image-rendering:crisp-edges;
-  pointer-events:none;
-}
-
-#scene{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  background:#3aa0ff;
-}
-
-/* Intro */
+/* INTRO ALWAYS */
 #gorillaIntro{
   position:absolute;
   width:260px;
@@ -41,9 +21,7 @@ img{
   opacity:0;
   animation:flyIntro 4s ease-out forwards;
   animation-delay:0.3s;
-  filter:hue-rotate(200deg);
 }
-
 @keyframes flyIntro{
   0%{bottom:-220px;left:-220px;opacity:1;}
   100%{bottom:100vh;left:100vw;opacity:0;}
@@ -53,307 +31,197 @@ img{
   position:absolute;
   top:50%;left:50%;
   transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
-  font-size:3.2rem;
+  font-size:3rem;
   color:#fff;
   opacity:0;
   animation:vanillaSpin 2.5s ease-out forwards;
   animation-delay:2s;
 }
-
 @keyframes vanillaSpin{
   0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
-  30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
-  60%{opacity:1;}
+  40%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
   100%{opacity:0;}
 }
 
+/* STORY (only once) */
 #overlay{
-  position:absolute;
-  inset:0;
-  background:#000;
-  opacity:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:opacity 1s ease;
-  z-index:5;
-}
-
-#storyText{
-  color:#fff;
-  font-size:1.6rem;
-  max-width:80vw;
-  text-align:center;
-  opacity:0;
-  transition:opacity 1s ease;
+  position:absolute;inset:0;background:#000;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;opacity:0;transition:opacity 1s;z-index:5;
 }
 
 #skipBtn{
-  position:absolute;
-  bottom:15px;
-  right:15px;
-  padding:8px 14px;
-  background:rgba(0,0,0,0.7);
-  color:#fff;
-  border:2px solid #fff;
-  border-radius:4px;
-  cursor:pointer;
+  position:absolute;bottom:15px;right:15px;
+  padding:8px 14px;background:#000;color:#fff;border:2px solid #fff;
   z-index:6;
 }
 
-/* Game */
-#gameLayer{
-  position:absolute;
-  inset:0;
-  display:none;
-  overflow:hidden;
-}
-
-#worldStack{
-  position:absolute;
-  width:100%;
-  height:200vh;
-}
-
-#gameWorld{
-  position:absolute;
-  width:100%;
-  height:100vh;
-}
+/* GAME */
+#gameLayer{position:absolute;inset:0;display:none;}
+#worldStack{position:absolute;width:100%;height:200vh;}
+#gameWorld{position:absolute;width:100%;height:100vh;}
 
 #player{
-  position:absolute;
-  width:22vw;
-  max-width:110px;
-  left:150px;
-  top:50%;
-  transform:translateY(-50%);
+  position:absolute;width:22vw;max-width:110px;
+  left:140px;top:50%;transform:translateY(-50%);
 }
 
-.plane{
-  position:absolute;
-  width:28vw;
-  max-width:140px;
+.plane{position:absolute;width:28vw;max-width:140px;}
+
+#score{position:absolute;top:15px;left:20px;color:#fff;font-size:1.5rem;}
+#hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;}
+
+#pauseBtn{
+  position:absolute;bottom:15px;left:15px;
+  padding:8px 12px;background:#000;color:#fff;border:2px solid #fff;
 }
 
-#score{
-  position:absolute;
-  top:15px;
-  left:20px;
-  font-size:1.6rem;
-  font-weight:700;
-  color:#fff;
-}
-
-/* Death */
-#deathScreen{
-  position:absolute;
-  top:100vh;
-  width:100%;
-  height:100vh;
-}
-
-#deathImage{
-  position:absolute;
-  bottom:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:100%;
-  height:auto;
-  object-fit:cover;
-  z-index:1;
-}
-
+/* DEATH */
+#deathScreen{position:absolute;top:100vh;width:100%;height:100vh;}
+#deathImage{position:absolute;bottom:0;width:100%;}
 #deathText{
-  position:absolute;
-  top:60px;
-  left:50%;
-  transform:translateX(-50%);
-  color:#fff;
-  text-align:center;
-  z-index:3;
+  position:absolute;top:60px;left:50%;
+  transform:translateX(-50%);color:#fff;text-align:center;
 }
-
-#restartBtn{
-  margin-top:16px;
-  padding:8px 16px;
-  background:rgba(0,0,0,0.7);
-  color:#fff;
-  border:2px solid #fff;
-  border-radius:4px;
-  cursor:pointer;
-}
+button{cursor:pointer;}
 </style>
 </head>
 
 <body>
 <div id="scene">
 
+<!-- ALWAYS INTRO -->
 <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
 <div id="vanillaText">VANILLA GORILLA</div>
 
+<!-- STORY -->
 <div id="overlay"><div id="storyText"></div></div>
-<button id="skipBtn">Skip cutscene</button>
+<button id="skipBtn">Skip</button>
 
+<!-- GAME -->
 <div id="gameLayer">
 <div id="worldStack">
 
 <div id="gameWorld">
 <div id="score">Score: 0</div>
+<div id="hearts">❤️❤️❤️</div>
+<button id="pauseBtn">Pause</button>
 <img id="player" src="images/gor2-removebg-preview.png">
 </div>
 
 <div id="deathScreen">
 <div id="deathText">
-<h1 id="deathTitle">YOU DIED</h1>
-<p id="scoreLine">Score: 0</p>
-<p id="bestScoreLine">Best Score: 0</p>
-<button id="restartBtn">Go again</button>
+<h1>YOU DIED</h1>
+<p id="scoreLine"></p>
+<p id="bestScoreLine"></p>
+<button id="restartBtn">Restart</button>
 </div>
 <img id="deathImage" src="images/dead gor.png">
 </div>
 
 </div>
 </div>
+
 </div>
 
 <script>
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
 const skipBtn=document.getElementById("skipBtn");
-const introGorilla=document.getElementById("gorillaIntro");
-const vanillaText=document.getElementById("vanillaText");
-
-let cutsceneSkipped=false;
-
-function fadeStory(t){
-  storyText.style.opacity="0";
-  setTimeout(()=>{
-    if(cutsceneSkipped)return;
-    storyText.textContent=t;
-    storyText.style.opacity="1";
-  },250);
-}
-
-setTimeout(()=>{if(!cutsceneSkipped)overlay.style.opacity="1";},4500);
-setTimeout(()=>{if(!cutsceneSkipped)fadeStory("The year is 2067 — 80 years since Hitler won the war.");},5500);
-setTimeout(()=>{if(!cutsceneSkipped)fadeStory("You are the British Rebellion’s last hope.");},9500);
-
-setTimeout(()=>{
-  if(cutsceneSkipped)return;
-  overlay.style.opacity="0";
-  setTimeout(()=>{
-    overlay.style.display="none";
-    startGameplay();
-    skipBtn.style.display="none";
-  },800);
-},13500);
-
-skipBtn.onclick=()=>{
-  cutsceneSkipped=true;
-  overlay.style.display="none";
-  introGorilla.style.display="none";
-  vanillaText.style.display="none";
-  skipBtn.style.display="none";
-  startGameplay();
-};
 
 const gameLayer=document.getElementById("gameLayer");
 const worldStack=document.getElementById("worldStack");
-const gameWorld=document.getElementById("gameWorld");
 const player=document.getElementById("player");
-const scoreEl=document.getElementById("score");
 
-const deathTitle=document.getElementById("deathTitle");
+const scoreEl=document.getElementById("score");
+const heartsEl=document.getElementById("hearts");
+const pauseBtn=document.getElementById("pauseBtn");
+
 const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
 const restartBtn=document.getElementById("restartBtn");
 
-let y=window.innerHeight/2;
-let velocity=0;
-let gravity=0.18;
+let y, velocity;
 const flapStrength=-10.5;
 
-let started=false;
-let running=false;
+let running=false, paused=false;
 let planes=[];
-let planeSpawnTimer=0;
+let score=0, scoreTimer=0;
+let lives=3;
+let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0");
 
-let score=0;
-let scoreTimer=0;
-let safeFrames=0;
+let seenIntro=localStorage.getItem("vg_seen_intro");
 
-let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
+/* STORY CUTSCENE */
+function playStory(){
+  overlay.style.opacity="1";
 
-function startGameplay(){
-  gameLayer.style.display="block";
-  worldStack.style.transform="translateY(0)";
-  worldStack.style.transition="transform 0s";
+  setTimeout(()=>{storyText.textContent=" Its 1969 23 years after we lost the war to the Nazis...";},1000);
+  setTimeout(()=>{storyText.textContent="You are the Brittish Rebeliions last hope.";},4000);
 
-  running=true;
-  started=false;
-  y=window.innerHeight/2;
-  velocity=0;
-
-  planes.forEach(p=>p.remove());
-  planes=[];
-  planeSpawnTimer=0;
-
-  score=0;
-  scoreTimer=0;
-  safeFrames=0;
-  gravity=0.18;
-
-  player.style.top=y+"px";
-  player.style.display="block";
-
-  scoreEl.textContent="Score: 0";
-
-  document.addEventListener("keydown",input);
-  document.addEventListener("mousedown",input);
-  document.addEventListener("touchstart",input,{passive:false});
-
-  requestAnimationFrame(gameLoop);
+  setTimeout(()=>{
+    overlay.style.opacity="0";
+    setTimeout(()=>{
+      overlay.style.display="none";
+      startGame();
+    },1000);
+  },7000);
 }
 
-function input(e){
-  if(!running)return;
-
-  if(e.type==="touchstart"){
-    e.preventDefault();
-    flap();
-    return;
+/* ALWAYS INTRO FIRST */
+setTimeout(()=>{
+  if(seenIntro){
+    overlay.style.display="none";
+    startGame();
+  }else{
+    playStory();
+    localStorage.setItem("vg_seen_intro","1");
   }
+},4500);
 
-  if(e.type==="mousedown"||e.code==="Space"||e.code==="ArrowUp"){
-    flap();
-  }
+skipBtn.onclick=()=>{
+  overlay.style.display="none";
+  skipBtn.style.display="none";
+  startGame();
+};
+
+/* GAME */
+function updateHearts(){
+  heartsEl.textContent="❤️".repeat(lives);
 }
+
+document.addEventListener("mousedown", flap);
+document.addEventListener("touchstart", e=>{e.preventDefault();flap();});
+
+pauseBtn.onclick=()=>{
+  paused=!paused;
+  pauseBtn.textContent=paused?"Resume":"Pause";
+};
 
 function flap(){
-  if(!started)started=true;
+  if(!running||paused)return;
   velocity=flapStrength;
 }
 
-function spawnPlane(){
-  let maxPlanes=Math.min(6,2+Math.floor(safeFrames/500));
-  if(planes.length>=maxPlanes)return;
+function spawnPlane(gap=false){
+  if(gap){
+    let gapY=Math.random()*(window.innerHeight-200)+100;
+    createPlane(gapY-180);
+    createPlane(gapY+180);
+    return;
+  }
+  createPlane(Math.random()*(window.innerHeight-200)+80);
+}
 
-  const plane=document.createElement("img");
-  plane.src="images/plane-removebg-preview.png";
-  plane.className="plane";
-
-  let yPos=Math.random()*(window.innerHeight-200)+80;
-  plane.style.top=yPos+"px";
-  plane.style.left=window.innerWidth+"px";
-
-  let speedBase=1.2;
-  let speedScale=Math.min(1.5,safeFrames/1200);
-
-  plane.dataset.speed=(speedBase+Math.random()*0.5+speedScale);
-
-  gameWorld.appendChild(plane);
-  planes.push(plane);
+function createPlane(yPos){
+  const p=document.createElement("img");
+  p.src="images/plane-removebg-preview.png";
+  p.className="plane";
+  p.style.top=yPos+"px";
+  p.style.left=window.innerWidth+"px";
+  p.dataset.speed=1.5+Math.random();
+  document.getElementById("gameWorld").appendChild(p);
+  planes.push(p);
 }
 
 function hit(a,b){
@@ -362,70 +230,63 @@ function hit(a,b){
   return !(ar.right<br.left||ar.left>br.right||ar.bottom<br.top||ar.top>br.bottom);
 }
 
-function gameLoop(){
+function shake(){
+  document.body.style.transform="translate(6px)";
+  setTimeout(()=>document.body.style.transform="translate(-6px)",50);
+  setTimeout(()=>document.body.style.transform="translate(0)",100);
+}
+
+function loop(){
   if(!running)return;
 
-  safeFrames++;
-
-  if(safeFrames>600)gravity=0.22;
-  if(safeFrames>1400)gravity=0.26;
-
-  if(started){
-    velocity+=gravity;
+  if(!paused){
+    velocity+=0.2;
     y+=velocity;
-  }
 
-  if(y>window.innerHeight-40){
-    triggerDeath();
-    return;
-  }
+    if(y<0){y=0;velocity=0;}
+    if(y>window.innerHeight-40){triggerDeath();return;}
 
-  player.style.top=y+"px";
+    player.style.top=y+"px";
+    player.style.transform=`translateY(-50%) rotate(${velocity*2}deg)`;
 
-  if(safeFrames>180){
-    planeSpawnTimer++;
-    let spawnRate=Math.max(110,220-safeFrames*0.12);
-
-    if(planeSpawnTimer>spawnRate){
-      planeSpawnTimer=0;
-      spawnPlane();
+    if(Math.random()<0.02){
+      spawnPlane(Math.random()<0.3);
     }
-  }
 
-  planes.forEach((p,i)=>{
-    let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
-    p.style.left=left+"px";
+    planes.forEach((p,i)=>{
+      let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
+      p.style.left=left+"px";
+      if(left<-200){p.remove();planes.splice(i,1);}
+    });
 
-    if(left<-200){
-      p.remove();
-      planes.splice(i,1);
-    }
-  });
-
-  if(safeFrames>120){
     for(const p of planes){
       if(hit(player,p)){
-        triggerDeath();
-        return;
+        lives--;
+        updateHearts();
+        shake();
+
+        if(lives<=0){
+          triggerDeath();
+          return;
+        }
       }
+    }
+
+    scoreTimer++;
+    if(scoreTimer>14){
+      score++;
+      scoreTimer=0;
+      scoreEl.textContent="Score: "+score;
     }
   }
 
-  scoreTimer++;
-  if(scoreTimer>=14){
-    scoreTimer=0;
-    score++;
-    scoreEl.textContent="Score: "+score;
-  }
-
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
 
 function triggerDeath(){
   running=false;
 
   let dv=0;
-
   function fall(){
     dv+=0.9;
     y+=dv;
@@ -434,28 +295,39 @@ function triggerDeath(){
     if(y<window.innerHeight+200){
       requestAnimationFrame(fall);
     }else{
-      startScrollDown();
+      showDeath();
     }
   }
   fall();
 }
 
-function startScrollDown(){
+function showDeath(){
   if(score>bestScore){
     bestScore=score;
     localStorage.setItem("vg_best_score",bestScore);
   }
 
   scoreLine.textContent="Score: "+score;
-  bestScoreLine.textContent="Best Score: "+bestScore;
+  bestScoreLine.textContent="Best: "+bestScore;
 
-  player.style.display="none";
-
-  worldStack.style.transition="transform 2s ease";
   worldStack.style.transform="translateY(-100vh)";
 }
 
-restartBtn.onclick=()=>startGameplay();
+restartBtn.onclick=()=>location.reload();
+
+function startGame(){
+  gameLayer.style.display="block";
+
+  y=window.innerHeight/2;
+  velocity=0;
+  lives=3;
+  score=0;
+  running=true;
+
+  updateHearts();
+  loop();
+}
 </script>
+
 </body>
 </html>
