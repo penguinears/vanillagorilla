@@ -167,9 +167,10 @@ img{
   z-index:1;
 }
 #deathImage{
-  width:480px;
+  width:520px;
+  height:auto;
   position:absolute;
-  bottom:250px;
+  bottom:240px; /* nudged so whole gorilla visually sits on grass */
   left:50%;
   transform:translateX(-50%);
   z-index:2;
@@ -226,7 +227,6 @@ img{
 </div>
 
 <script>
-/* INTRO */
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
 const skipBtn=document.getElementById("skipBtn");
@@ -310,6 +310,7 @@ function startGameplay(){
   player.src="images/gor2-removebg-preview.png";
   player.style.top=y+"px";
   player.style.transform="translateY(-50%) rotate(0deg)";
+  player.style.display="block"; // show player again
   scoreEl.textContent="Score: 0";
 
   document.addEventListener("keydown",input);
@@ -443,7 +444,6 @@ function triggerDeath(){
     dv+=dg;
     y+=dv;
     player.style.top=y+"px";
-
     player.style.transform=`translateY(-50%) rotate(15deg)`;
 
     if(y<window.innerHeight+160){
@@ -469,6 +469,8 @@ function startScrollDown(){
   deathTitle.textContent=msgs[Math.floor(Math.random()*msgs.length)];
   scoreLine.textContent="Score: "+score;
   bestScoreLine.textContent="Best Score: "+bestScore;
+
+  player.style.display="none"; // hide tiny gorilla on death screen
 
   worldStack.style.transition="transform 2s ease-in";
   worldStack.style.transform="translateY(-100vh)";
