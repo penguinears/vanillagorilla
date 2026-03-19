@@ -166,15 +166,16 @@ img{
   z-index:1;
 }
 
-/* FIXED */
+/* ✅ FIX */
 #deathImage{
   width:520px;
   height:auto;
   position:absolute;
   bottom:400px;
   left:50%;
-  transform:translateX(-50%) translateY(-100%);
+  transform:translateX(-50%);
   z-index:2;
+  max-height:calc(100vh - 400px);
 }
 
 #deathText{
