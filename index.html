@@ -39,6 +39,7 @@
       opacity: 0;
       animation: flyIntro 4s ease-out forwards;
       animation-delay: 0.3s;
+      filter: hue-rotate(200deg); /* blue tint */
     }
     @keyframes flyIntro {
       0% { bottom: -250px; left: -250px; opacity: 1; transform: rotate(25deg); }
@@ -85,6 +86,21 @@
       color: #fff;
     }
 
+    #skipBtn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 6;
+      padding: 8px 14px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
     /* GAMEPLAY */
     #gameLayer {
       position: absolute;
@@ -128,7 +144,7 @@
       z-index: 4;
     }
 
-    /* DEATH SCREEN (below, with green ground) */
+    /* DEATH SCREEN */
     #deathScreen {
       position: absolute;
       inset: 0;
@@ -147,7 +163,7 @@
       z-index: 2;
     }
     #deathText h1 {
-      font-size: 3rem;
+      font-size: 2.4rem;
       margin-bottom: 10px;
     }
     #deathText p {
@@ -167,8 +183,21 @@
       bottom: 0;
       width: 100%;
       height: 140px;
-      background: #2ecc40; /* green ground only on death screen */
+      background: #2ecc40; /* green ground only here */
       z-index: 1;
+    }
+
+    #restartBtn {
+      margin-top: 20px;
+      padding: 10px 18px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      z-index: 2;
     }
   </style>
 </head>
@@ -183,6 +212,8 @@
       <div id="storyText"></div>
     </div>
 
+    <button id="skipBtn">Skip cutscene</button>
+
     <!-- GAME -->
     <div id="gameLayer">
       <div id="gameWorld">
@@ -191,12 +222,13 @@
       </div>
     </div>
 
-    <!-- DEATH SCREEN (below, revealed by scroll) -->
+    <!-- DEATH SCREEN -->
     <div id="deathScreen">
       <div id="deathText">
-        <h1>YOU DIED</h1>
+        <h1 id="deathTitle">YOU DIED</h1>
         <p id="scoreLine">Score: 0</p>
         <p id="bestScoreLine">Best Score: 0</p>
+        <button id="restartBtn">Go again</button>
       </div>
       <img id="deathImage" src="images/dead_gor-removebg-preview.png" />
       <div id="deathGround"></div>
@@ -214,6 +246,19 @@
     const deathScreen = document.getElementById("deathScreen");
     const scoreLine = document.getElementById("scoreLine");
     const bestScoreLine = document.getElementById("bestScoreLine");
+    const deathTitle = document.getElementById("deathTitle");
+    const skipBtn = document.getElementById("skipBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const introGorilla = document.getElementById("gorillaIntro");
+    const vanillaText = document.getElementById("vanillaText");
+
+    const deathMessages = [
+      "You died L bozo",
+      "How r u so bad",
+      "My grandma can play better than u"
+    ];
+
+    let cutsceneSkipped = false;
 
     /* INTRO TIMING */
     const blackScreenTime = 4500;
@@ -221,10 +266,15 @@
     const secondLineTime = firstLineTime + 4000;
     const startGameTime = secondLineTime + 4000;
 
-    function showOverlay() { overlay.style.opacity = "1"; }
+    function showOverlay() {
+      if (cutsceneSkipped) return;
+      overlay.style.opacity = "1";
+    }
     function showText(t) {
+      if (cutsceneSkipped) return;
       storyText.style.opacity = "0";
       setTimeout(() => {
+        if (cutsceneSkipped) return;
         storyText.textContent = t;
         storyText.style.opacity = "1";
       }, 400);
@@ -235,25 +285,38 @@
     setTimeout(() => showText("You are the British last hope. Fly past the German army and crash into him to end it."), secondLineTime);
 
     setTimeout(() => {
+      if (cutsceneSkipped) return;
       overlay.style.opacity = "0";
       setTimeout(() => {
+        if (cutsceneSkipped) return;
         overlay.style.display = "none";
         startGameplay();
+        skipBtn.style.display = "none";
       }, 1000);
     }, startGameTime);
+
+    skipBtn.addEventListener("click", () => {
+      if (cutsceneSkipped) return;
+      cutsceneSkipped = true;
+      overlay.style.display = "none";
+      introGorilla.style.display = "none";
+      vanillaText.style.display = "none";
+      skipBtn.style.display = "none";
+      startGameplay();
+    });
 
     /* GAMEPLAY */
     let y = window.innerHeight / 2;
     let velocity = 0;
-    let gravity = 0.45;          // softer gravity
-    const flapStrength = -10;    // strong but not insane
+    let gravity = 0.45;
+    const flapStrength = -10;
     let started = false;
     let running = false;
     let planes = [];
     let planeSpawnTimer = 0;
     let score = 0;
     let scoreTimer = 0;
-    let safeFrames = 0;          // grace period
+    let safeFrames = 0;
     let bestScore = parseInt(localStorage.getItem("vg_best_score") || "0", 10);
 
     function startGameplay() {
@@ -302,7 +365,7 @@
       const maxY = window.innerHeight - 220;
       plane.style.top = (Math.random() * (maxY - minY) + minY) + "px";
       plane.style.left = window.innerWidth + "px";
-      plane.dataset.speed = (2.5 + Math.random() * 2.5).toString(); // slightly slower
+      plane.dataset.speed = (2.5 + Math.random() * 2.5).toString();
 
       gameWorld.appendChild(plane);
       planes.push(plane);
@@ -324,7 +387,7 @@
         y += velocity;
       }
 
-      const floor = window.innerHeight - 40; // a bit lower, more forgiving
+      const floor = window.innerHeight - 40;
 
       if (started && safeFrames > 40 && y > floor) {
         y = floor;
@@ -343,7 +406,6 @@
       angle = Math.max(-35, Math.min(35, angle));
       player.style.transform = `translateY(-50%) rotate(${angle}deg)`;
 
-      // planes only after some time
       if (safeFrames > 120) {
         planeSpawnTimer++;
         if (planeSpawnTimer > 90) {
@@ -419,15 +481,15 @@
         localStorage.setItem("vg_best_score", bestScore);
       }
 
+      const msg = deathMessages[Math.floor(Math.random() * deathMessages.length)];
+      deathTitle.textContent = msg;
       scoreLine.textContent = "Score: " + score;
       bestScoreLine.textContent = "Best Score: " + bestScore;
 
-      // show death screen behind, make gameLayer transparent
       deathScreen.style.display = "flex";
       deathScreen.style.zIndex = 1;
       gameLayer.style.background = "transparent";
 
-      // move world UP so it feels like camera goes DOWN to death screen
       gameWorld.style.transition = "transform 2s ease-in";
       gameWorld.style.transform = "translateY(-100vh)";
 
@@ -435,6 +497,10 @@
         gameLayer.style.display = "none";
       }, 2000);
     }
+
+    restartBtn.addEventListener("click", () => {
+      startGameplay();
+    });
   </script>
 </body>
 </html>
