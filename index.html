@@ -76,19 +76,19 @@ let y=window.innerHeight/2;
 let velocity=0;
 let gravity=0.27;
 const flapStrength=-6.5;
-let started=false, running=false;
+let started=false,running=false;
 let planes=[];
-let planeSpawnTimer=0, safeFrames=0, score=0, scoreTimer=0, lives=3;
+let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
 let seenStory=localStorage.getItem("vg_seen_intro");
 
 // STORY
-function fadeStory(t){storyText.style.opacity="0"; setTimeout(()=>{storyText.textContent=t; storyText.style.opacity="1";},250);}
+function fadeStory(t){storyText.style.opacity="0";setTimeout(()=>{storyText.textContent=t;storyText.style.opacity="1";},250);}
 function playStory(){
 overlay.style.display="flex"; overlay.style.opacity="1";
 setTimeout(()=>fadeStory("The year is 2067 — 80 years since Hitler won the war."),1000);
 setTimeout(()=>fadeStory("You are the British Rebellion’s last hope."),4000);
-setTimeout(()=>{overlay.style.opacity="0"; setTimeout(()=>{overlay.style.display="none"; startGameplay();},800);},7000);
+setTimeout(()=>{overlay.style.opacity="0";setTimeout(()=>{overlay.style.display="none";startGameplay();},800);},7000);
 localStorage.setItem("vg_seen_intro","1");
 }
 skipBtn.onclick=()=>{overlay.style.display="none"; skipBtn.style.display="none"; startGameplay();};
@@ -96,7 +96,7 @@ skipBtn.onclick=()=>{overlay.style.display="none"; skipBtn.style.display="none";
 // INPUT
 document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp") flap();});
 document.addEventListener("mousedown",flap);
-document.addEventListener("touchstart", e=>{e.preventDefault(); flap();});
+document.addEventListener("touchstart",e=>{e.preventDefault(); flap();});
 function flap(){if(!running) return; started=true; velocity=flapStrength;}
 
 // HEARTS
@@ -107,42 +107,40 @@ function spawnPlane(){
 let maxPlanes=Math.min(6,2+Math.floor(safeFrames/400));
 if(planes.length>=maxPlanes) return;
 const plane=document.createElement("img"); plane.src="images/plane-removebg-preview.png"; plane.className="plane";
-let minY=70, maxY=window.innerHeight-230;
+let minY=70,maxY=window.innerHeight-230;
 let yPos=Math.random()*(maxY-minY)+minY;
-if(planes.length>0){const last=parseFloat(planes[planes.length-1].style.top); if(Math.abs(yPos-last)<160) yPos+=200;}
+if(planes.length>0){const last=parseFloat(planes[planes.length-1].style.top);if(Math.abs(yPos-last)<160)yPos+=200;}
 plane.style.top=yPos+"px"; plane.style.left=window.innerWidth+"px";
 plane.dataset.speed=(0.9+Math.random()*0.6+Math.min(1.2,safeFrames/600));
 gameWorld.appendChild(plane); planes.push(plane);
 }
 
 // COLLISION
-function hit(a,b){const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect(); const shrink=28;
-return !(ar.right-shrink<br.left+shrink||ar.left+shrink>br.right-shrink||ar.bottom-shrink<br.top+shrink||ar.top+shrink>br.bottom-shrink);}
+function hit(a,b){const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();const shrink=28;return!(ar.right-shrink<br.left+shrink||ar.left+shrink>br.right-shrink||ar.bottom-shrink<br.top+shrink||ar.top+shrink>br.bottom-shrink);}
 function shake(){document.body.style.transform="translate(6px)"; setTimeout(()=>document.body.style.transform="translate(-6px)",50); setTimeout(()=>document.body.style.transform="translate(0)",100);}
 
 // GAME LOOP
 function gameLoop(){
 if(!running) return;
 safeFrames++;
-if(started){velocity+=gravity; y+=velocity;}
-if(y<0){y=0; velocity=0;}
-if(y>window.innerHeight-45){y=window.innerHeight-45; triggerDeath(); return;}
-player.style.top=y+"px"; 
-let angle=velocity*2; if(angle>25) angle=25; if(angle<-25) angle=-25;
+if(started){velocity+=gravity;y+=velocity;}
+if(y<0){y=0;velocity=0;}
+if(y>window.innerHeight-45){y=window.innerHeight-45;triggerDeath();return;}
+player.style.top=y+"px";
+let angle=velocity*2;if(angle>25)angle=25;if(angle<-25)angle=-25;
 player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
-if(safeFrames>180){planeSpawnTimer++; if(planeSpawnTimer>Math.max(120,220-safeFrames/6)){planeSpawnTimer=0; if(Math.random()<0.3){spawnPlane(); spawnPlane();} else spawnPlane();}}
-planes.forEach((p,i)=>{let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed); p.style.left=left+"px"; if(left<-250){p.remove(); planes.splice(i,1);}
-if(hit(player,p)){lives--; updateHearts(); shake(); planes.splice(i,1); p.remove(); if(lives<=0){triggerDeath(); return;}}});
-if(started){scoreTimer++; if(scoreTimer>=14){scoreTimer=0; score++; scoreEl.textContent="Score: "+score;}}
+if(safeFrames>180){planeSpawnTimer++;if(planeSpawnTimer>Math.max(120,220-safeFrames/6)){planeSpawnTimer=0;if(Math.random()<0.3){spawnPlane();spawnPlane();}else spawnPlane();}}
+planes.forEach((p,i)=>{let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);p.style.left=left+"px";if(left<-250){p.remove();planes.splice(i,1);}
+if(hit(player,p)){lives--;updateHearts();shake();planes.splice(i,1);p.remove();if(lives<=0){triggerDeath();return;}}});
+if(started){scoreTimer++;if(scoreTimer>=14){scoreTimer=0;score++;scoreEl.textContent="Score: "+score;}}
 requestAnimationFrame(gameLoop);
 }
 
 // START GAME
 function startGameplay(){
-gameLayer.style.display="block"; worldStack.style.transition="transform 0s"; worldStack.style.transform="translateY(0)";
-started=false; running=true;
-y=window.innerHeight/2; velocity=0; score=0; scoreTimer=0; safeFrames=0; lives=3; updateHearts();
-planes.forEach(p=>p.remove()); planes=[]; scoreEl.textContent="Score: 0"; player.style.top=y+"px"; player.style.transform="translateY(-50%) rotate(0deg)";
+gameLayer.style.display="block";worldStack.style.transition="transform 0s";worldStack.style.transform="translateY(0)";
+started=false;running=true;y=window.innerHeight/2;velocity=0;score=0;scoreTimer=0;safeFrames=0;lives=3;updateHearts();
+planes.forEach(p=>p.remove());planes=[];scoreEl.textContent="Score: 0";player.style.top=y+"px";player.style.transform="translateY(-50%) rotate(0deg)";
 requestAnimationFrame(gameLoop);
 }
 
@@ -150,17 +148,25 @@ requestAnimationFrame(gameLoop);
 function triggerDeath(){
 if(!running) return; running=false;
 player.src="images/gor3-removebg-preview.png"; let dv=0;
-function fall(){dv+=0.9; y+=dv; player.style.top=y+"px"; player.style.transform=`translateY(-50%) rotate(15deg)`; if(y<window.innerHeight+160) requestAnimationFrame(fall); else startScrollDown();}
+function fall(){dv+=0.9;y+=dv;player.style.top=y+"px";player.style.transform=`translateY(-50%) rotate(15deg)`;if(y<window.innerHeight+160)requestAnimationFrame(fall);else startScrollDown();}
 fall();
 }
 function startScrollDown(){
-if(score>bestScore){bestScore=score; localStorage.setItem("vg_best_score",String(bestScore));}
+if(score>bestScore){bestScore=score;localStorage.setItem("vg_best_score",String(bestScore));}
 const msgs=["You died L bozo","How r u so bad","My grandma can play better then u"];
 deathTitle.textContent=msgs[Math.floor(Math.random()*msgs.length)];
-scoreLine.textContent="Score: "+score; bestScoreLine.textContent="Best Score: "+bestScore;
-player.style.display="none"; worldStack.style.transition="transform 2s ease-in"; worldStack.style.transform="translateY(-100vh)";
+scoreLine.textContent="Score: "+score;bestScoreLine.textContent="Best Score: "+bestScore;
+player.style.display="none";worldStack.style.transition="transform 2s ease-in";worldStack.style.transform="translateY(-100vh)";
 }
-restartBtn.onclick=()=>{worldStack.style.transition="none"; worldStack.style.transform="translateY(0)"; planes.forEach(p=>p.remove()); planes=[]; startGameplay(); setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);}
+
+// RESTART BUTTON
+restartBtn.onclick = () => {
+worldStack.style.transition = "none";
+worldStack.style.transform = "translateY(0)";
+planes.forEach(p=>p.remove()); planes=[];
+startGameplay();
+setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);
+}
 
 // INIT
 setTimeout(()=>{if(seenStory) startGameplay(); else playStory();},4500);
