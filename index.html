@@ -13,7 +13,7 @@
     body {
       background: #111;
       overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
       color: #fff;
     }
 
@@ -27,10 +27,10 @@
 
     #gorilla {
       position: absolute;
-      width: 220px;
-      bottom: -200px;
-      left: -200px;
-      transform: rotate(-20deg);
+      width: 300px; /* bigger */
+      bottom: -250px;
+      left: -250px;
+      transform: rotate(25deg); /* now facing top-right */
       opacity: 0;
       animation: fly 4s ease-out forwards;
       animation-delay: 0.3s;
@@ -38,10 +38,10 @@
 
     @keyframes fly {
       0% {
-        bottom: -200px;
-        left: -200px;
+        bottom: -250px;
+        left: -250px;
         opacity: 1;
-        transform: translate(0, 0) rotate(-20deg);
+        transform: rotate(25deg);
       }
       50% {
         opacity: 1;
@@ -50,7 +50,7 @@
         bottom: 100vh;
         left: 100vw;
         opacity: 0;
-        transform: translate(0, 0) rotate(-20deg);
+        transform: rotate(25deg);
       }
     }
 
@@ -59,14 +59,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
-      font-size: 3rem;
+      font-size: 3.5rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: #f5f5f5;
       opacity: 0;
       text-align: center;
       animation: vanillaSpin 2.5s ease-out forwards;
-      animation-delay: 2s; /* roughly halfway through the flight */
+      animation-delay: 2s;
     }
 
     @keyframes vanillaSpin {
@@ -102,7 +102,7 @@
     #storyText {
       max-width: 80vw;
       text-align: center;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       line-height: 1.5;
       opacity: 0;
       transition: opacity 1s ease;
@@ -111,7 +111,6 @@
 </head>
 <body>
   <div id="scene">
-    <!-- adjust path if needed, e.g. "images/gor1-removebg-preview.png" -->
     <img id="gorilla" src="images/gor1-removebg-preview.png" alt="Gorilla" />
     <div id="vanillaText">VANILLA GORILLA</div>
 
@@ -136,31 +135,23 @@
       }, 400);
     }
 
-    // Sequence timings (in ms)
-    const startTime = 0;
-    const blackScreenTime = 4500;   // after gorilla + vanilla gorilla
-    const nothingTime = blackScreenTime + 800;
-    const firstLineTime = nothingTime + 2500;
+    // Timings
+    const blackScreenTime = 4500;
+    const firstLineTime = blackScreenTime + 1000;
     const secondLineTime = firstLineTime + 4000;
 
-    // 1) Fade to black
+    // Fade to black
     setTimeout(showOverlay, blackScreenTime);
 
-    // 2) Text: "nothing"
+    // First story line
     setTimeout(() => {
-      showText("nothing");
-    }, nothingTime);
-
-    // 3) First story line
-    setTimeout(() => {
-      showText("the years 2067 80 years since hiteler won the war");
+      showText("The year is 2067 — 80 years since Hitler won the war.");
     }, firstLineTime);
 
-    // 4) Second story line
+    // Second story line
     setTimeout(() => {
-      showText("you are the brittitesh laST JOPE YOU WILL NEED TO FLY past the germana rmy thren crash into him killing him");
+      showText("You are the British last hope. You must fly past the German army and crash into him, ending it once and for all.");
     }, secondLineTime);
   </script>
 </body>
 </html>
-
