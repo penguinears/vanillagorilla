@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -164,9 +165,9 @@ worldStack.style.transform = "translateY(0)";
 setTimeout(()=>{planes.forEach(p=>p.remove());planes=[];y=window.innerHeight/2;velocity=0;started=false;running=true;score=0;scoreTimer=0;safeFrames=0;lives=3;updateHearts();scoreEl.textContent="Score: 0";player.style.top=y+"px";player.style.transform="translateY(-50%) rotate(0deg)";player.style.display="block";requestAnimationFrame(gameLoop);setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);},1000);
 }
 
-// INIT
+// SHOW INTRO
 gorillaIntro.style.display="block"; vanillaText.style.display="block";
-setTimeout(()=>startGameplay(), 5000); // show title for 5s before gameplay
+setTimeout(()=>startGameplay(), 5000);
 </script>
 </body>
 </html>
