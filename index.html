@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vanilla Gorilla Intro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #111;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #fff;
+    }
+
+    #scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #gorilla {
+      position: absolute;
+      width: 220px;
+      bottom: -200px;
+      left: -200px;
+      transform: rotate(-20deg);
+      opacity: 0;
+      animation: fly 4s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    @keyframes fly {
+      0% {
+        bottom: -200px;
+        left: -200px;
+        opacity: 1;
+        transform: translate(0, 0) rotate(-20deg);
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        bottom: 100vh;
+        left: 100vw;
+        opacity: 0;
+        transform: translate(0, 0) rotate(-20deg);
+      }
+    }
+
+    #vanillaText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
+      font-size: 3rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #f5f5f5;
+      opacity: 0;
+      text-align: center;
+      animation: vanillaSpin 2.5s ease-out forwards;
+      animation-delay: 2s; /* roughly halfway through the flight */
+    }
+
+    @keyframes vanillaSpin {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1) rotate(-180deg);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1) rotate(10deg);
+      }
+      60% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9) rotate(20deg);
+      }
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1s ease;
+    }
+
+    #storyText {
+      max-width: 80vw;
+      text-align: center;
+      font-size: 1.6rem;
+      line-height: 1.5;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="scene">
+    <!-- adjust path if needed, e.g. "images/gor1-removebg-preview.png" -->
+    <img id="gorilla" src="images/gor1-removebg-preview.png" alt="Gorilla" />
+    <div id="vanillaText">VANILLA GORILLA</div>
+
+    <div id="overlay">
+      <div id="storyText"></div>
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById("overlay");
+    const storyText = document.getElementById("storyText");
+
+    function showOverlay() {
+      overlay.style.opacity = "1";
+    }
+
+    function showText(text) {
+      storyText.style.opacity = "0";
+      setTimeout(() => {
+        storyText.textContent = text;
+        storyText.style.opacity = "1";
+      }, 400);
+    }
+
+    // Sequence timings (in ms)
+    const startTime = 0;
+    const blackScreenTime = 4500;   // after gorilla + vanilla gorilla
+    const nothingTime = blackScreenTime + 800;
+    const firstLineTime = nothingTime + 2500;
+    const secondLineTime = firstLineTime + 4000;
+
+    // 1) Fade to black
+    setTimeout(showOverlay, blackScreenTime);
+
+    // 2) Text: "nothing"
+    setTimeout(() => {
+      showText("nothing");
+    }, nothingTime);
+
+    // 3) First story line
+    setTimeout(() => {
+      showText("the years 2067 80 years since hiteler won the war");
+    }, firstLineTime);
+
+    // 4) Second story line
+    setTimeout(() => {
+      showText("you are the brittitesh laST JOPE YOU WILL NEED TO FLY past the germana rmy thren crash into him killing him");
+    }, secondLineTime);
+  </script>
+</body>
+</html>
 
