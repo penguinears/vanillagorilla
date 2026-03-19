@@ -19,13 +19,13 @@ img{
   pointer-events:none;
 }
 
-/* SCENE */
+/* SCENE — BLUE SKY NOW */
 #scene{
   position:relative;
   width:100vw;
   height:100vh;
   overflow:hidden;
-  background:#000;
+  background:#3aa0ff; /* BLUE SKY */
 }
 
 /* INTRO */
@@ -64,7 +64,7 @@ img{
 #overlay{
   position:absolute;
   inset:0;
-  background:#000;
+  background:#000; /* fades to black only during story */
   opacity:0;
   display:flex;
   align-items:center;
@@ -170,7 +170,7 @@ img{
   width:520px;
   height:auto;
   position:absolute;
-  bottom:240px; /* nudged so whole gorilla visually sits on grass */
+  bottom:210px; /* FIXED — sits ON grass */
   left:50%;
   transform:translateX(-50%);
   z-index:2;
@@ -227,6 +227,7 @@ img{
 </div>
 
 <script>
+/* INTRO */
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
 const skipBtn=document.getElementById("skipBtn");
@@ -246,7 +247,7 @@ function fadeStory(t){
 
 setTimeout(()=>{if(!cutsceneSkipped)overlay.style.opacity="1";},4500);
 setTimeout(()=>{if(!cutsceneSkipped)fadeStory("The year is 2067 — 80 years since Hitler won the war.");},5500);
-setTimeout(()=>{if(!cutsceneSkipped)fadeStory("You are the British last hope. Fly past the German army and crash into him to end it.");},9500);
+setTimeout(()=>{if(!cutsceneSkipped)fadeStory("You are the British Rebellion’s last hope.");},9500);
 setTimeout(()=>{
   if(cutsceneSkipped)return;
   overlay.style.opacity="0";
@@ -300,8 +301,12 @@ function startGameplay(){
   started=false;
   y=window.innerHeight/2;
   velocity=0;
+
+  /* FIX: remove leftover planes */
+  planes.forEach(p=>p.remove());
   planes=[];
   planeSpawnTimer=0;
+
   score=0;
   scoreTimer=0;
   safeFrames=0;
@@ -310,7 +315,7 @@ function startGameplay(){
   player.src="images/gor2-removebg-preview.png";
   player.style.top=y+"px";
   player.style.transform="translateY(-50%) rotate(0deg)";
-  player.style.display="block"; // show player again
+  player.style.display="block"; /* FIX: show player again */
   scoreEl.textContent="Score: 0";
 
   document.addEventListener("keydown",input);
@@ -470,7 +475,7 @@ function startScrollDown(){
   scoreLine.textContent="Score: "+score;
   bestScoreLine.textContent="Best Score: "+bestScore;
 
-  player.style.display="none"; // hide tiny gorilla on death screen
+  player.style.display="none"; /* FIX: hide tiny gorilla */
 
   worldStack.style.transition="transform 2s ease-in";
   worldStack.style.transform="translateY(-100vh)";
