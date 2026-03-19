@@ -39,7 +39,7 @@
       opacity: 0;
       animation: flyIntro 4s ease-out forwards;
       animation-delay: 0.3s;
-      filter: hue-rotate(200deg); /* blue tint */
+      filter: hue-rotate(200deg); /* BLUE */
     }
     @keyframes flyIntro {
       0% { bottom: -250px; left: -250px; opacity: 1; transform: rotate(25deg); }
@@ -88,7 +88,7 @@
 
     #skipBtn {
       position: absolute;
-      top: 15px;
+      bottom: 15px;
       right: 15px;
       z-index: 6;
       padding: 8px 14px;
@@ -144,23 +144,44 @@
       z-index: 4;
     }
 
-    /* DEATH SCREEN */
+    /* DEATH SCREEN (BOTTOM OF WORLD) */
     #deathScreen {
       position: absolute;
-      inset: 0;
-      background: #3aa0ff; /* blue sky */
-      display: none;
+      top: 100vh; /* BELOW the game world */
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: #3aa0ff; /* sky */
+      display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       z-index: 1;
     }
 
+    #deathGround {
+      width: 100%;
+      height: 200px;
+      background: #2ecc40; /* green */
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    #deathImage {
+      width: 350px;
+      position: absolute;
+      bottom: 200px; /* sits ON the green */
+      z-index: 2;
+    }
+
     #deathText {
+      position: absolute;
+      top: 80px;
       text-align: center;
       color: #fff;
-      margin-bottom: 20px;
-      z-index: 2;
+      z-index: 3;
     }
     #deathText h1 {
       font-size: 2.4rem;
@@ -169,22 +190,6 @@
     #deathText p {
       font-size: 1.4rem;
       margin: 4px 0;
-    }
-
-    #deathImage {
-      width: 350px;
-      height: auto;
-      margin-top: 20px;
-      z-index: 2;
-    }
-
-    #deathGround {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 140px;
-      background: #2ecc40; /* green ground only here */
-      z-index: 1;
     }
 
     #restartBtn {
@@ -197,7 +202,7 @@
       font-size: 1rem;
       cursor: pointer;
       user-select: none;
-      z-index: 2;
+      z-index: 3;
     }
   </style>
 </head>
@@ -222,7 +227,7 @@
       </div>
     </div>
 
-    <!-- DEATH SCREEN -->
+    <!-- DEATH SCREEN AT BOTTOM -->
     <div id="deathScreen">
       <div id="deathText">
         <h1 id="deathTitle">YOU DIED</h1>
@@ -255,7 +260,7 @@
     const deathMessages = [
       "You died L bozo",
       "How r u so bad",
-      "My grandma can play better than u"
+      "My grandma can play better then u"
     ];
 
     let cutsceneSkipped = false;
@@ -296,7 +301,6 @@
     }, startGameTime);
 
     skipBtn.addEventListener("click", () => {
-      if (cutsceneSkipped) return;
       cutsceneSkipped = true;
       overlay.style.display = "none";
       introGorilla.style.display = "none";
@@ -308,7 +312,7 @@
     /* GAMEPLAY */
     let y = window.innerHeight / 2;
     let velocity = 0;
-    let gravity = 0.45;
+    let gravity = 0.25; // easier start
     const flapStrength = -10;
     let started = false;
     let running = false;
@@ -333,6 +337,7 @@
       score = 0;
       scoreTimer = 0;
       safeFrames = 0;
+      gravity = 0.25;
 
       player.src = "images/gor2-removebg-preview.png";
       player.style.top = y + "px";
@@ -365,7 +370,9 @@
       const maxY = window.innerHeight - 220;
       plane.style.top = (Math.random() * (maxY - minY) + minY) + "px";
       plane.style.left = window.innerWidth + "px";
-      plane.dataset.speed = (2.5 + Math.random() * 2.5).toString();
+
+      let speedBoost = Math.min(3, safeFrames / 300);
+      plane.dataset.speed = (1.5 + Math.random() * 1.5 + speedBoost).toString();
 
       gameWorld.appendChild(plane);
       planes.push(plane);
@@ -382,6 +389,8 @@
 
       safeFrames++;
 
+      if (safeFrames > 600) gravity = 0.45;
+
       if (started) {
         velocity += gravity;
         y += velocity;
@@ -389,7 +398,7 @@
 
       const floor = window.innerHeight - 40;
 
-      if (started && safeFrames > 40 && y > floor) {
+      if (started && safeFrames > 60 && y > floor) {
         y = floor;
         triggerDeath();
         return;
@@ -408,7 +417,8 @@
 
       if (safeFrames > 120) {
         planeSpawnTimer++;
-        if (planeSpawnTimer > 90) {
+        let spawnRate = Math.max(40, 120 - safeFrames / 4);
+        if (planeSpawnTimer > spawnRate) {
           planeSpawnTimer = 0;
           spawnPlane();
         }
@@ -486,9 +496,8 @@
       scoreLine.textContent = "Score: " + score;
       bestScoreLine.textContent = "Best Score: " + bestScore;
 
-      deathScreen.style.display = "flex";
-      deathScreen.style.zIndex = 1;
       gameLayer.style.background = "transparent";
+      deathScreen.style.display = "flex";
 
       gameWorld.style.transition = "transform 2s ease-in";
       gameWorld.style.transform = "translateY(-100vh)";
