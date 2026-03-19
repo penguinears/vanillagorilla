@@ -54,6 +54,7 @@ button{cursor:pointer;}
 </div>
 </div>
 </div>
+
 <script>
 const overlay=document.getElementById("overlay");
 const storyText=document.getElementById("storyText");
@@ -68,9 +69,9 @@ const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
 const restartBtn=document.getElementById("restartBtn");
 
-let y,velocity,lives,score,safeFrames;
-const flapStrength=-10.5;
-let running=false,paused=false;
+let y, velocity, lives, score, safeFrames, scoreTimer;
+const flapStrength=-11.5;
+let running=false, paused=false, started=false;
 let planes=[];
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0");
 
@@ -95,82 +96,104 @@ skipBtn.onclick=()=>{
   startGame();
 };
 
-/* GAME LOGIC */
-function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
+/* INPUT */
+document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp") flap();});
 document.addEventListener("mousedown",flap);
-document.addEventListener("touchstart",e=>{e.preventDefault();flap();});
-pauseBtn.onclick=()=>{paused=!paused; pauseBtn.textContent=paused?"Resume":"Pause";}
-function flap(){if(!running||paused)return; velocity=flapStrength;}
+document.addEventListener("touchstart",e=>{e.preventDefault(); flap();});
 
+pauseBtn.onclick=()=>{paused=!paused; pauseBtn.textContent=paused?"Resume":"Pause";}
+
+function flap(){if(!running||paused)return; started=true; velocity=flapStrength;}
+
+/* SPAWN PLANES */
 function spawnPlane(gap=false){
-  if(gap){let gapY=Math.random()*(window.innerHeight-200)+100; createPlane(gapY-180); createPlane(gapY+180); return;}
+  if(gap){
+    let gapY=Math.random()*(window.innerHeight-200)+100;
+    createPlane(gapY-180); createPlane(gapY+180); return;
+  }
   createPlane(Math.random()*(window.innerHeight-200)+80);
 }
 function createPlane(yPos){
   const p=document.createElement("img");
   p.src="images/plane-removebg-preview.png"; p.className="plane";
   p.style.top=yPos+"px"; p.style.left=window.innerWidth+"px";
-  p.dataset.speed=1.5+Math.random();
-  document.getElementById("gameWorld").appendChild(p);
-  planes.push(p);
+  p.dataset.speed=(0.9+Math.random()*0.6+Math.min(1.2,safeFrames/600));
+  gameWorld.appendChild(p); planes.push(p);
 }
+
+/* COLLISION */
 function hit(a,b){const ar=a.getBoundingClientRect(); const br=b.getBoundingClientRect();
 return !(ar.right<br.left||ar.left>br.right||ar.bottom<br.top||ar.top>br.bottom);}
 function shake(){document.body.style.transform="translate(6px)"; setTimeout(()=>document.body.style.transform="translate(-6px)",50); setTimeout(()=>document.body.style.transform="translate(0)",100);}
 
+function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
+
+/* GAME LOOP */
 function loop(){
   if(!running) return;
   if(!paused){
     safeFrames++;
-    velocity+=0.2; y+=velocity;
+    if(started) velocity+=0.18, y+=velocity;
 
+    const playerHeight=parseFloat(getComputedStyle(player).height);
     if(y<0) y=0;
-    if(y>window.innerHeight-parseFloat(getComputedStyle(player).height)) y=window.innerHeight-parseFloat(getComputedStyle(player).height);
+    if(y>window.innerHeight-playerHeight) y=window.innerHeight-playerHeight;
 
     player.style.top=y+"px";
-    player.style.transform=`translateY(-50%) rotate(${velocity*2}deg)`;
+    let angle=velocity*1.6; if(angle>25)angle=25; if(angle<-25)angle=-25;
+    player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
-    if(Math.random()<0.02) spawnPlane(Math.random()<0.3);
+    if(safeFrames>180 && Math.random()<0.02) spawnPlane(Math.random()<0.3);
 
     planes.forEach((p,i)=>{
       let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
       p.style.left=left+"px";
-      if(left<-200){p.remove();planes.splice(i,1);}
+
       if(hit(player,p)){
-        lives--; updateHearts(); shake(); planes.splice(i,1); p.remove();
+        lives--; updateHearts(); shake();
+        planes.splice(i,1); p.remove();
         if(lives<=0){triggerDeath(); return;}
       }
+
+      if(left<-250){p.remove(); planes.splice(i,1);}
     });
 
     scoreTimer++;
-    if(scoreTimer>14){score++; scoreTimer=0; scoreEl.textContent="Score: "+score;}
+    if(scoreTimer>=14){score++; scoreTimer=0; scoreEl.textContent="Score: "+score;}
   }
   requestAnimationFrame(loop);
 }
 
+/* DEATH */
 function triggerDeath(){
-  running=false; let dv=0;
+  running=false; started=false; let dv=0;
   function fall(){dv+=0.9; y+=dv; player.style.top=y+"px";
-    if(y<window.innerHeight+200) requestAnimationFrame(fall);
+    if(y<window.innerHeight+160) requestAnimationFrame(fall);
     else showDeath();
-  }
-  fall();
+  } fall();
 }
-
 function showDeath(){
   if(score>bestScore){bestScore=score; localStorage.setItem("vg_best_score",bestScore);}
   scoreLine.textContent="Score: "+score; bestScoreLine.textContent="Best: "+bestScore;
   worldStack.style.transform="translateY(-100vh)";
 }
 
+/* RESTART */
 restartBtn.onclick=()=>{
-  worldStack.style.transform="translateY(0)";
+  worldStack.style.transition="none"; worldStack.style.transform="translateY(0)";
   planes.forEach(p=>p.remove()); planes=[];
   startGame();
+  setTimeout(()=>worldStack.style.transition="transform 0.5s",50);
 }
 
+/* START GAME */
 function startGame(){
-  gameLayer.style.display="block"; y=window.innerHeight/2; velocity=0; lives=3; score=0; safeFrames=0; running=true; paused=false; updateHearts(); loop();
+  gameLayer.style.display="block";
+  y=window.innerHeight/2; velocity=0; lives=3; score=0; safeFrames=0; scoreTimer=0;
+  started=false; running=true; paused=false; updateHearts();
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  loop();
 }
 
 /* INIT */
