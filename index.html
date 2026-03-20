@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vanilla Gorilla</title>
 <link rel="icon" type="image/png" href="images/dead gor.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#000;overflow:hidden;font-family:sans-serif;-webkit-tap-highlight-color:transparent;}
@@ -15,9 +15,9 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 @keyframes flyIntro{0%{bottom:-220px;left:-220px;opacity:1;}100%{bottom:100vh;left:100vw;opacity:0;}}
 #vanillaText{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);font-size:3.2rem;color:#fff;opacity:0;animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 @keyframes vanillaSpin{0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}}
-#overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;opacity:0;transition:opacity 1s;z-index:5;}
+#overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;opacity:0;pointer-events:none;transition:opacity 0.6s;z-index:5;}
 #storyText{max-width:80vw;font-size:1.6rem;}
-#skipBtn{position:absolute;bottom:15px;right:15px;padding:8px 14px;background:rgba(0,0,0,0.7);color:#fff;border:2px solid #fff;border-radius:4px;cursor:pointer;z-index:6;}
+#skipBtn{position:absolute;bottom:15px;right:15px;padding:8px 14px;background:rgba(0,0,0,0.7);color:#fff;border:2px solid #fff;border-radius:4px;cursor:pointer;z-index:6;display:none;}
 #gameLayer{position:absolute;inset:0;background:#3aa0ff;display:none;overflow:hidden;z-index:3;}
 #worldStack{position:absolute;left:0;top:0;width:100%;height:200vh;transition:transform 0s;}
 #gameWorld{position:absolute;left:0;top:0;width:100%;height:100vh;}
@@ -25,8 +25,9 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 .plane{position:absolute;width:140px;z-index:3;}
 #score{position:absolute;top:15px;left:20px;font-size:1.6rem;font-weight:700;color:#fff;z-index:5;}
 #hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;z-index:5;}
+#pauseBtn{position:absolute;top:15px;left:50%;transform:translateX(-50%);font-size:2rem;color:#fff;cursor:pointer;z-index:6;display:none;}
 #deathScreen{position:absolute;left:0;top:100vh;width:100%;height:100vh;display:flex;align-items:flex-end;justify-content:center;background:#3aa0ff;}
-#deathGround{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;height:400px;background-image:url('images/dead gor.png');background-size:contain;background-position:bottom center;background-repeat:no-repeat;z-index:2;}
+#deathGround{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;height:min(45vh,420px);background-image:url('images/dead gor.png');background-size:contain;background-position:bottom center;background-repeat:no-repeat;z-index:2;}
 #deathText{position:absolute;top:60px;left:50%;transform:translateX(-50%);color:#fff;text-align:center;z-index:3;}
 #deathText h1{font-size:2.2rem;margin-bottom:10px;}
 #deathText p{font-size:1.3rem;margin:4px 0;}
@@ -38,7 +39,7 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
   <div id="vanillaText">VANILLA GORILLA</div>
 
-  <div id="overlay"><div id="storyText"></div></div>
+  <div id="overlay"><div id="storyText">The skies are hostile. Survive as long as you can.</div></div>
   <button id="skipBtn">Skip cutscene</button>
 
   <div id="gameLayer">
@@ -46,6 +47,7 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
       <div id="gameWorld">
         <div id="score">Score: 0</div>
         <div id="hearts">❤️❤️❤️</div>
+        <div id="pauseBtn">⏸️</div>
         <img id="player" src="images/gor2-removebg-preview.png">
       </div>
 
@@ -78,96 +80,272 @@ const deathTitle=document.getElementById("deathText").querySelector("h1");
 const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
 const restartBtn=document.getElementById("restartBtn");
+const pauseBtn=document.getElementById("pauseBtn");
 
 let y=window.innerHeight/2;
 let velocity=0;
 let gravity=0.27;
 const flapStrength=-6.5;
-let started=false,running=false;
+let started=false,running=false,paused=false;
 let planes=[];
 let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
+const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // INPUT
-document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp") flap();});
+document.addEventListener("keydown",e=>{
+  if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
+});
 document.addEventListener("mousedown",flap);
-document.addEventListener("touchstart",e=>{e.preventDefault(); flap();});
-function flap(){if(!running) return; started=true; velocity=flapStrength;}
+document.addEventListener("touchstart",e=>{e.preventDefault();flap();});
+function flap(){if(!running||paused)return;started=true;velocity=flapStrength;}
 
 // HEARTS
 function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
 
 // PLANES
-function spawnPlane() {
-    let maxPlanes = Math.min(6, 2 + Math.floor(safeFrames / 400));
-    if (planes.length >= maxPlanes) return;
-    const plane = document.createElement("img");
-    plane.src = "images/plane-removebg-preview.png";
-    plane.className = "plane";
-    const minY = 50;
-    const maxY = window.innerHeight - 230;
-    let yPos = Math.random() * (maxY - minY) + minY;
-    if (planes.length > 0){const lastPlane = parseFloat(planes[planes.length - 1].style.top); if(Math.abs(yPos-lastPlane)<160)yPos+=160;if(yPos>maxY)yPos=maxY;}
-    plane.style.top=yPos+"px"; plane.style.left=window.innerWidth+"px";
-    plane.dataset.speed=(0.9+Math.random()*0.6+Math.min(1.2,safeFrames/600));
-    gameWorld.appendChild(plane);
-    planes.push(plane);
+function spawnPlane(){
+  let maxPlanes=Math.min(6,2+Math.floor(safeFrames/400));
+  if(planes.length>=maxPlanes)return;
+  const plane=document.createElement("img");
+  plane.src="images/plane-removebg-preview.png";
+  plane.className="plane";
+  const minY=50;
+  const maxY=window.innerHeight-230;
+  let yPos=Math.random()*(maxY-minY)+minY;
+  if(planes.length>0){
+    const lastPlane=parseFloat(planes[planes.length-1].style.top);
+    if(Math.abs(yPos-lastPlane)<160)yPos+=160;
+    if(yPos>maxY)yPos=maxY;
+  }
+  plane.style.top=yPos+"px";
+  plane.style.left=window.innerWidth+"px";
+  plane.dataset.speed=(0.9+Math.random()*0.6+Math.min(1.2,safeFrames/600));
+  gameWorld.appendChild(plane);
+  planes.push(plane);
 }
 
 // COLLISION
-function hit(a,b){const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();const shrink=28;return!(ar.right-shrink<br.left+shrink||ar.left+shrink>br.right-shrink||ar.bottom-shrink<br.top+shrink||ar.top+shrink>br.bottom-shrink);}
-function shake(){document.body.style.transform="translate(6px)";setTimeout(()=>document.body.style.transform="translate(-6px)",50);setTimeout(()=>document.body.style.transform="translate(0)",100);}
+function hit(a,b){
+  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+  const shrink=28;
+  return !(ar.right-shrink<br.left+shrink||ar.left+shrink>br.right-shrink||ar.bottom-shrink<br.top+shrink||ar.top+shrink>br.bottom-shrink);
+}
+function shake(){
+  document.body.style.transform="translate(6px)";
+  setTimeout(()=>document.body.style.transform="translate(-6px)",50);
+  setTimeout(()=>document.body.style.transform="translate(0)",100);
+}
+
+// BONUS
+function flashBonus(text){
+  const b=document.createElement("div");
+  b.textContent=text;
+  b.style.position="absolute";
+  b.style.left="180px";
+  b.style.top=(y-40)+"px";
+  b.style.color="yellow";
+  b.style.fontSize="1.4rem";
+  b.style.fontWeight="700";
+  b.style.zIndex="10";
+  b.style.opacity="1";
+  b.style.transition="1s";
+  gameWorld.appendChild(b);
+  setTimeout(()=>{b.style.opacity="0";b.style.top=(y-80)+"px";},50);
+  setTimeout(()=>b.remove(),1100);
+}
 
 // GAME LOOP
 function gameLoop(){
-if(!running) return;
-safeFrames++;
-if(started){velocity+=gravity;y+=velocity;}
-if(y<0){y=0;velocity=0;}
-if(y>window.innerHeight-45){y=window.innerHeight-45;triggerDeath();return;}
-player.style.top=y+"px";
-let angle=velocity*2;if(angle>25)angle=25;if(angle<-25)angle=-25;
-player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
-if(safeFrames>180){planeSpawnTimer++;if(planeSpawnTimer>Math.max(120,220-safeFrames/6)){planeSpawnTimer=0;if(Math.random()<0.3){spawnPlane();spawnPlane();}else spawnPlane();}}
-planes.forEach((p,i)=>{let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);p.style.left=left+"px";if(left<-250){p.remove();planes.splice(i,1);}
-if(hit(player,p)){lives--;updateHearts();shake();planes.splice(i,1);p.remove();if(lives<=0){triggerDeath();return;}}});
-if(started){scoreTimer++;if(scoreTimer>=14){scoreTimer=0;score++;scoreEl.textContent="Score: "+score;}}
-requestAnimationFrame(gameLoop);
+  if(!running||paused)return;
+  safeFrames++;
+
+  if(isPC && score>bestScore-10) gravity=0.32; else gravity=0.27;
+
+  if(started){velocity+=gravity;y+=velocity;}
+  if(y<0){y=0;velocity=0;}
+  if(y>window.innerHeight-45){y=window.innerHeight-45;triggerDeath();return;}
+  player.style.top=y+"px";
+  let angle=velocity*2;if(angle>25)angle=25;if(angle<-25)angle=-25;
+  player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
+
+  if(safeFrames>180){
+    planeSpawnTimer++;
+    if(planeSpawnTimer>Math.max(120,220-safeFrames/6)){
+      planeSpawnTimer=0;
+      if(Math.random()<0.3){spawnPlane();spawnPlane();}else spawnPlane();
+    }
+  }
+
+  for(let i=planes.length-1;i>=0;i--){
+    const p=planes[i];
+    let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
+    p.style.left=left+"px";
+
+    // bonus when passing near player
+    if(left<150 && !p.bonusGiven){
+      p.bonusGiven=true;
+      const gap=Math.abs(parseFloat(p.style.top)-y);
+      if(gap<60){score+=5;flashBonus("+5");}
+      else if(gap<100){score+=2;flashBonus("+2");}
+      updateScoreDisplay();
+    }
+
+    if(left<-250){
+      p.remove();
+      planes.splice(i,1);
+      continue;
+    }
+
+    if(hit(player,p)){
+      lives--;
+      updateHearts();
+      shake();
+      planes.splice(i,1);
+      p.remove();
+      if(lives<=0){triggerDeath();return;}
+    }
+  }
+
+  if(started){
+    scoreTimer++;
+    if(scoreTimer>=14){
+      scoreTimer=0;
+      score++;
+      updateScoreDisplay();
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function updateScoreDisplay(){
+  if(score>bestScore){
+    scoreEl.style.color="yellow";
+    scoreEl.innerHTML=`<i class="fa-solid fa-crown" style="color:rgb(255,212,59);margin-right:6px;"></i> Score: ${score}`;
+  }else{
+    scoreEl.style.color="#fff";
+    scoreEl.textContent="Score: "+score;
+  }
 }
 
 // START GAME
 function startGameplay(){
-gameLayer.style.display="block";worldStack.style.transition="transform 0s";worldStack.style.transform="translateY(0)";
-started=false;running=true;y=window.innerHeight/2;velocity=0;score=0;scoreTimer=0;safeFrames=0;lives=3;updateHearts();
-planes.forEach(p=>p.remove());planes=[];scoreEl.textContent="Score: 0";player.style.top=y+"px";player.style.transform="translateY(-50%) rotate(0deg)";
-requestAnimationFrame(gameLoop);
+  overlay.style.opacity="0";
+  overlay.style.pointerEvents="none";
+  skipBtn.style.display="none";
+
+  gameLayer.style.display="block";
+  worldStack.style.transition="transform 0s";
+  worldStack.style.transform="translateY(0)";
+  started=false;running=true;paused=false;
+  y=window.innerHeight/2;velocity=0;score=0;scoreTimer=0;safeFrames=0;lives=3;
+  updateHearts();
+  planes.forEach(p=>p.remove());planes=[];
+  scoreEl.style.color="#fff";
+  scoreEl.textContent="Score: 0";
+  player.src="images/gor2-removebg-preview.png";
+  player.style.width="110px";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  player.style.display="block";
+  pauseBtn.style.display="block";
+  pauseBtn.textContent="⏸️";
+  requestAnimationFrame(gameLoop);
 }
 
 // DEATH
 function triggerDeath(){
-if(!running) return; running=false;
-player.src="images/gor3-removebg-preview.png"; let dv=0;
-function fall(){dv+=0.9;y+=dv;player.style.top=y+"px";player.style.transform=`translateY(-50%) rotate(15deg)`;if(y<window.innerHeight+160)requestAnimationFrame(fall);else startScrollDown();}
-fall();
+  if(!running)return;
+  running=false;
+  paused=false;
+  player.src="images/gor3-removebg-preview.png";
+  player.style.width="110px";
+  let dv=0;
+  function fall(){
+    dv+=0.9;y+=dv;
+    player.style.top=y+"px";
+    player.style.transform=`translateY(-50%) rotate(15deg)`;
+    if(y<window.innerHeight+160)requestAnimationFrame(fall);
+    else startScrollDown();
+  }
+  fall();
 }
+
 function startScrollDown(){
-if(score>bestScore){bestScore=score;localStorage.setItem("vg_best_score",String(bestScore));}
-const msgs=["You died L bozo","How r u so bad","My grandma can play better then u"];
-deathTitle.textContent=msgs[Math.floor(Math.random()*msgs.length)];
-scoreLine.textContent="Score: "+score;bestScoreLine.textContent="Best Score: "+bestScore;
-player.style.display="none";worldStack.style.transition="transform 2s ease-in";worldStack.style.transform="translateY(-100vh)";
+  if(score>bestScore){
+    bestScore=score;
+    localStorage.setItem("vg_best_score",String(bestScore));
+  }
+  const msgs=["You died L bozo","How r u so bad","My grandma can play better then u"];
+  deathTitle.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  scoreLine.textContent="Score: "+score;
+  bestScoreLine.textContent="Best Score: "+bestScore;
+  player.style.display="none";
+  worldStack.style.transition="transform 2s ease-in";
+  worldStack.style.transform="translateY(-100vh)";
 }
 
 // RESTART BUTTON
-restartBtn.onclick = () => {
-worldStack.style.transition = "transform 1s ease-out";
-worldStack.style.transform = "translateY(0)";
-setTimeout(()=>{planes.forEach(p=>p.remove());planes=[];y=window.innerHeight/2;velocity=0;started=false;running=true;score=0;scoreTimer=0;safeFrames=0;lives=3;updateHearts();scoreEl.textContent="Score: 0";player.style.top=y+"px";player.style.transform="translateY(-50%) rotate(0deg)";player.style.display="block";requestAnimationFrame(gameLoop);setTimeout(()=>worldStack.style.transition="transform 2s ease-in",50);},1000);
+restartBtn.onclick=()=>{
+  worldStack.style.transition="transform 1s ease-out";
+  worldStack.style.transform="translateY(0)";
+  setTimeout(()=>{
+    planes.forEach(p=>p.remove());planes=[];
+    y=window.innerHeight/2;
+    velocity=0;
+    started=false;
+    running=true;
+    paused=false;
+    score=0;
+    scoreTimer=0;
+    safeFrames=0;
+    lives=3;
+    updateHearts();
+    player.src="images/gor2-removebg-preview.png";
+    player.style.width="110px";
+    player.style.display="block";
+    player.style.top=y+"px";
+    player.style.transform="translateY(-50%) rotate(0deg)";
+    scoreEl.style.color="#fff";
+    scoreEl.textContent="Score: 0";
+    pauseBtn.style.display="block";
+    pauseBtn.textContent="⏸️";
+    requestAnimationFrame(gameLoop);
+    setTimeout(()=>{worldStack.style.transition="transform 2s ease-in";},50);
+  },900);
+};
+
+// PAUSE
+pauseBtn.onclick=()=>{
+  if(!running)return;
+  paused=!paused;
+  if(paused){
+    pauseBtn.textContent="▶️";
+  }else{
+    pauseBtn.textContent="⏸️";
+    requestAnimationFrame(gameLoop);
+  }
+};
+
+// CUTSCENE / SKIP
+function showStory(){
+  overlay.style.opacity="1";
+  overlay.style.pointerEvents="auto";
+  skipBtn.style.display="block";
+  setTimeout(()=>{startGameplay();},4000);
 }
 
-// SHOW INTRO
-gorillaIntro.style.display="block"; vanillaText.style.display="block";
-setTimeout(()=>startGameplay(), 5000);
+skipBtn.onclick=()=>{
+  if(overlay.style.opacity==="1"){
+    startGameplay();
+  }
+};
+
+// INTRO
+gorillaIntro.style.display="block";
+vanillaText.style.display="block";
+setTimeout(showStory,4500);
 </script>
 </body>
 </html>
