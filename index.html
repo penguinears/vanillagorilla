@@ -7,7 +7,10 @@
 <link rel="icon" type="image/png" href="images/dead gor.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{
+  margin:0;padding:0;box-sizing:border-box;
+  user-select:none;-webkit-user-select:none;
+}
 body{background:#000;overflow:hidden;font-family:sans-serif;-webkit-tap-highlight-color:transparent;}
 img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
@@ -48,15 +51,16 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 
 #gameLayer{position:absolute;inset:0;background:#3aa0ff;display:none;overflow:hidden;z-index:3;}
 #worldStack{position:absolute;left:0;top:0;width:100%;height:200vh;transition:transform 0s;}
-#gameWorld{position:absolute;left:0;top:0;width:100%;height:100vh;}
+#gameWorld{position:absolute;left:0;top:0;width:100%;height:100vh;overflow:hidden;}
 
 #player{
   position:absolute;width:110px;left:150px;top:50%;
   transform:translateY(-50%) rotate(0deg);
-  transition:transform 0.08s linear;z-index:4;
+  transition:transform 0.06s linear;z-index:4;
 }
 
 .plane{position:absolute;width:140px;z-index:3;}
+.banana{position:absolute;width:60px;z-index:3;}
 
 #ground{
   position:absolute;
@@ -64,24 +68,19 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
   left:0;
   width:100%;
   height:180px;
-  background-image:url('images/dead gor.png');
-  background-size:cover;
-  background-position:bottom center;
-  background-repeat:repeat-x;
+  background:#1f7a2e;
   z-index:1;
-  animation:groundScroll 6s linear infinite;
-}
-@keyframes groundScroll{
-  from{background-position-x:0;}
-  to{background-position-x:-300px;}
 }
 
-#score{position:absolute;top:15px;left:20px;font-size:1.6rem;font-weight:700;color:#fff;z-index:5;}
+#score{position:absolute;top:10px;left:20px;font-size:1.6rem;font-weight:700;color:#fff;z-index:5;}
+#bananaCount{position:absolute;top:42px;left:20px;font-size:1.3rem;color:#ffe066;z-index:5;display:flex;align-items:center;gap:6px;}
+#bananaCount img{width:26px;height:auto;}
+
 #hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;z-index:5;}
 
 #pauseBtn{
-  position:absolute;top:15px;left:50%;transform:translateX(-50%);
-  font-size:2rem;color:#fff;cursor:pointer;z-index:6;display:none;
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  font-size:1.8rem;color:#fff;cursor:pointer;z-index:6;display:none;
 }
 
 #deathScreen{
@@ -124,8 +123,12 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 
       <div id="gameWorld">
         <div id="score">Score: 0</div>
+        <div id="bananaCount">
+          <img src="images/bbb-removebg-preview.png" alt="">
+          <span id="bananaText">Bananas: 0</span>
+        </div>
         <div id="hearts">❤️❤️❤️</div>
-        <div id="pauseBtn">⏸️</div>
+        <div id="pauseBtn"><i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i></div>
         <img id="player" src="images/gor2-removebg-preview.png">
         <div id="ground"></div>
       </div>
@@ -135,6 +138,7 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
           <h1>YOU DIED</h1>
           <p id="scoreLine">Score: 0</p>
           <p id="bestScoreLine">Best Score: 0</p>
+          <p id="bananaLine">Bananas: 0</p>
           <button id="restartBtn">Go again</button>
         </div>
         <div id="deathGround"></div>
@@ -157,19 +161,27 @@ const restartBtn=document.getElementById("restartBtn");
 const pauseBtn=document.getElementById("pauseBtn");
 const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
+const bananaText=document.getElementById("bananaText");
+const bananaLine=document.getElementById("bananaLine");
 
 let y=window.innerHeight/2;
 let velocity=0;
-let gravity=0.27;
-const flapStrength=-6.5;
+let gravity=0.24;
+const flapStrength=-6.8;
 
 let started=false,running=false,paused=false;
 let planes=[];
+let bananas=[];
 let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
 let middleTimer=0,diveFrames=0;
+let bananaSpawnTimer=0;
 
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
+let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
+
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+bananaText.textContent="Bananas: "+bananasTotal;
 
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
@@ -203,7 +215,7 @@ function flashBonus(text){
 }
 
 function spawnPlane(){
-  let maxPlanes=Math.min(6,2+Math.floor(safeFrames/400));
+  let maxPlanes=Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
 
   const plane=document.createElement("img");
@@ -211,13 +223,13 @@ function spawnPlane(){
   plane.className="plane";
 
   const minY=0;
-  const maxY=window.innerHeight-200;
+  const maxY=window.innerHeight-220;
   let yPos=Math.random()*(maxY-minY)+minY;
 
   plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
 
-  let baseSpeed=3.0+Math.random()*1.5+Math.min(2.5,safeFrames/300);
+  let baseSpeed=3.4+Math.random()*1.8+Math.min(3.0,safeFrames/280);
   if(isPC) baseSpeed*=1.1;
   plane.dataset.speed=baseSpeed;
 
@@ -225,9 +237,38 @@ function spawnPlane(){
   planes.push(plane);
 }
 
+function spawnBanana(){
+  const banana=document.createElement("img");
+  banana.src="images/bbb-removebg-preview.png";
+  banana.className="banana";
+
+  const minY=60;
+  const maxY=window.innerHeight-240;
+  let yPos=Math.random()*(maxY-minY)+minY;
+
+  banana.style.top=yPos+"px";
+  banana.style.left=window.innerWidth+"px";
+
+  let speed=3.0+Math.random()*1.2+Math.min(2.0,safeFrames/350);
+  if(isPC) speed*=1.05;
+  banana.dataset.speed=speed;
+
+  gameWorld.appendChild(banana);
+  bananas.push(banana);
+}
+
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=28;
+  return !(ar.right-shrink<br.left+shrink||
+           ar.left+shrink>br.right-shrink||
+           ar.bottom-shrink<br.top+shrink||
+           ar.top+shrink>br.bottom-shrink);
+}
+
+function hitBanana(a,b){
+  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+  const shrink=10;
   return !(ar.right-shrink<br.left+shrink||
            ar.left+shrink>br.right-shrink||
            ar.bottom-shrink<br.top+shrink||
@@ -256,16 +297,16 @@ function gameLoop(){
 
   player.style.top=y+"px";
 
-  let angle=velocity*2;
-  if(angle>25)angle=25;
-  if(angle<-25)angle=-25;
+  let angle=velocity*2.4;
+  if(angle>30)angle=30;
+  if(angle<-30)angle=-30;
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
   if(velocity>4){
     diveFrames++;
-    if(diveFrames>25){
+    if(diveFrames>20){
       player.src="images/gor3-removebg-preview.png";
-      player.style.width="125px";
+      player.style.width="120px";
     }
   }else{
     diveFrames=0;
@@ -290,11 +331,19 @@ function gameLoop(){
     }
   }
 
-  if(started && safeFrames>180){
+  if(started && safeFrames>120){
     planeSpawnTimer++;
-    if(planeSpawnTimer>Math.max(70,160-safeFrames/8)){
+    if(planeSpawnTimer>Math.max(60,150-safeFrames/10)){
       planeSpawnTimer=0;
       spawnPlane();
+    }
+  }
+
+  if(started && safeFrames>200){
+    bananaSpawnTimer++;
+    if(bananaSpawnTimer>120){
+      bananaSpawnTimer=0;
+      if(Math.random()<0.7) spawnBanana();
     }
   }
 
@@ -336,6 +385,27 @@ function gameLoop(){
     }
   }
 
+  for(let i=bananas.length-1;i>=0;i--){
+    const b=bananas[i];
+    let left=parseFloat(b.style.left)-parseFloat(b.dataset.speed);
+    b.style.left=left+"px";
+
+    if(left<-200){
+      b.remove();
+      bananas.splice(i,1);
+      continue;
+    }
+
+    if(hitBanana(player,b)){
+      bananasTotal++;
+      localStorage.setItem("vg_bananas",String(bananasTotal));
+      bananaText.textContent="Bananas: "+bananasTotal;
+      flashBonus("+1 🍌");
+      b.remove();
+      bananas.splice(i,1);
+    }
+  }
+
   if(started){
     scoreTimer++;
     if(scoreTimer>=14){
@@ -361,9 +431,11 @@ function startGameplay(){
   y=window.innerHeight/2;velocity=0;
   score=0;scoreTimer=0;safeFrames=0;lives=3;
   middleTimer=0;diveFrames=0;
+  bananaSpawnTimer=0;
 
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
+  bananas.forEach(b=>b.remove());bananas=[];
   scoreEl.style.color="#fff";
   scoreEl.textContent="Score: 0";
 
@@ -373,7 +445,7 @@ function startGameplay(){
   player.style.display="block";
 
   pauseBtn.style.display="block";
-  pauseBtn.textContent="⏸️";
+  pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
 
   requestAnimationFrame(gameLoop);
 }
@@ -389,7 +461,7 @@ function triggerDeath(){
   setTimeout(()=>document.body.style.transform="translate(0)",160);
 
   player.src="images/gor3-removebg-preview.png";
-  player.style.width="125px";
+  player.style.width="120px";
 
   let dv=0;
   function fall(){
@@ -413,6 +485,7 @@ function startScrollDown(){
 
   scoreLine.textContent="Score: "+score;
   bestScoreLine.textContent="Best Score: "+bestScore;
+  bananaLine.textContent="Bananas: "+bananasTotal;
 
   player.style.display="none";
 
@@ -426,6 +499,8 @@ restartBtn.onclick=()=>{
 
   setTimeout(()=>{
     planes.forEach(p=>p.remove());planes=[];
+    bananas.forEach(b=>b.remove());bananas=[];
+    planes=[];bananas=[];
     y=window.innerHeight/2;
     velocity=0;
     started=false;
@@ -437,6 +512,7 @@ restartBtn.onclick=()=>{
     lives=3;
     middleTimer=0;
     diveFrames=0;
+    bananaSpawnTimer=0;
 
     updateHearts();
 
@@ -450,7 +526,7 @@ restartBtn.onclick=()=>{
     scoreEl.textContent="Score: 0";
 
     pauseBtn.style.display="block";
-    pauseBtn.textContent="⏸️";
+    pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
 
     requestAnimationFrame(gameLoop);
 
@@ -461,7 +537,9 @@ restartBtn.onclick=()=>{
 pauseBtn.onclick=()=>{
   if(!running)return;
   paused=!paused;
-  pauseBtn.textContent=paused?"▶️":"⏸️";
+  pauseBtn.innerHTML=paused
+    ? '<i class="fa-solid fa-play" style="color: rgb(30, 48, 80);"></i>'
+    : '<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
