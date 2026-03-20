@@ -6,6 +6,7 @@
 <title>Vanilla Gorilla</title>
 <link rel="icon" type="image/png" href="images/dead gor.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
 *{
   margin:0;padding:0;box-sizing:border-box;
@@ -170,8 +171,10 @@ const bananaLine=document.getElementById("bananaLine");
 
 let y=window.innerHeight/2;
 let velocity=0;
-let gravity=0.21;
-const flapStrength=-8.2;
+
+const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+let flapStrength=isPC?-8.0:-6.2;
+let gravity=isPC?0.205:0.24;
 
 let started=false,running=false,paused=false;
 let planes=[];
@@ -182,8 +185,6 @@ let bananaSpawnTimer=0;
 
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
 let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
-
-const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 bananaText.textContent="Bananas: "+bananasTotal;
 
@@ -234,8 +235,8 @@ function spawnPlane(){
   plane.style.left=window.innerWidth+"px";
 
   let baseSpeed=3.2+Math.random()*1.4+Math.min(3.0,safeFrames/300);
-  if(!isPC) baseSpeed*=0.75;   // mobile slower
-  else baseSpeed*=1.15;        // pc faster
+  if(!isPC) baseSpeed*=0.75;
+  else baseSpeed*=1.15;
   plane.dataset.speed=baseSpeed;
 
   gameWorld.appendChild(plane);
@@ -295,11 +296,8 @@ function gameLoop(){
 
   safeFrames++;
 
-  if(started){
-    // movement identical on PC + mobile
-    velocity+=gravity;
-    y+=velocity;
-  }
+  velocity+=gravity;
+  y+=velocity;
 
   if(y<0){
     y=0;
@@ -313,9 +311,9 @@ function gameLoop(){
 
   player.style.top=y+"px";
 
-  let angle=velocity*3.2;
-  if(angle>35)angle=35;
-  if(angle<-35)angle=-35;
+  let tiltVel=velocity*0.65;
+  let angle=tiltVel*3.1;
+  angle=Math.max(-32,Math.min(32,angle));
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
   if(velocity>4){
@@ -368,7 +366,7 @@ function gameLoop(){
     let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
     p.style.left=left+"px";
 
-    if(left<150 && !p.bonusGiven){
+    if(left<150 && left>20 && !p.bonusGiven){
       p.bonusGiven=true;
 
       const gorCenter=y;
@@ -378,12 +376,11 @@ function gameLoop(){
       if(gap<45){
         score+=10;
         flashBonus("NARROW FIT +10");
-        updateScoreDisplay();
       }else if(gap<110){
         score+=5;
         flashBonus("GOOD GAP +5");
-        updateScoreDisplay();
       }
+      updateScoreDisplay();
     }
 
     if(left<-250){
