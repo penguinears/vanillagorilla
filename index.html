@@ -62,8 +62,8 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
 #player{
   position:absolute;
-  width:100px; /* PC default */
-  left:150px;  /* PC default */
+  width:100px;
+  left:150px;
   top:50%;
   transform:translateY(-50%) rotate(0deg);
   transition:transform 0.06s linear;
@@ -72,13 +72,13 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
 .plane{
   position:absolute;
-  width:120px; /* slightly smaller */
+  width:120px;
   z-index:3;
 }
 
 .banana{
   position:absolute;
-  width:55px; /* slightly smaller */
+  width:55px;
   z-index:3;
 }
 
@@ -167,7 +167,6 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 </div>
 
 <script>
-/* === ELEMENTS === */
 const overlay=document.getElementById("overlay");
 const skipBtn=document.getElementById("skipBtn");
 const gameLayer=document.getElementById("gameLayer");
@@ -183,23 +182,19 @@ const bestScoreLine=document.getElementById("bestScoreLine");
 const bananaText=document.getElementById("bananaText");
 const bananaLine=document.getElementById("bananaLine");
 
-/* === DEVICE CHECK === */
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-/* === MOBILE SIZE ADJUST === */
 if (!isPC) {
-    player.style.width = "85px";
-    player.style.left = "110px";
+  player.style.width = "85px";
+  player.style.left = "110px";
 } else {
-    player.style.width = "100px";
-    player.style.left = "150px";
+  player.style.width = "100px";
+  player.style.left = "150px";
 }
 
-/* === MOVEMENT VARS === */
 let y=window.innerHeight/2;
 let velocity=0;
 
-/* PC stays perfect — mobile slightly faster */
 let flapStrength = isPC ? -8.0 : -6.6;
 let gravity = isPC ? 0.205 : 0.25;
 
@@ -215,7 +210,6 @@ let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
 
 bananaText.textContent="Bananas: "+bananasTotal;
 
-/* === INPUT === */
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
 });
@@ -228,10 +222,8 @@ function flap(){
   velocity=flapStrength;
 }
 
-/* === HEARTS === */
 function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
 
-/* === BONUS TEXT === */
 function flashBonus(text){
   const b=document.createElement("div");
   b.textContent=text;
@@ -249,7 +241,6 @@ function flashBonus(text){
   setTimeout(()=>b.remove(),1100);
 }
 
-/* === PLANE SPAWN === */
 function spawnPlane(){
   let maxPlanes=Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
@@ -265,7 +256,6 @@ function spawnPlane(){
   plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
 
-  /* More variation + mobile slower */
   let baseSpeed=3.0 + Math.random()*2.0 + Math.min(3.0,safeFrames/300);
   if(!isPC) baseSpeed*=0.70;
   else baseSpeed*=1.18;
@@ -276,7 +266,6 @@ function spawnPlane(){
   planes.push(plane);
 }
 
-/* === BANANA SPAWN === */
 function spawnBanana(){
   const banana=document.createElement("img");
   banana.src="images/bbb-removebg-preview.png";
@@ -297,7 +286,6 @@ function spawnBanana(){
   bananas.push(banana);
 }
 
-/* === COLLISION === */
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=26;
@@ -316,7 +304,6 @@ function hitBanana(a,b){
            ar.top+shrink>br.bottom-shrink);
 }
 
-/* === SCORE DISPLAY === */
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
@@ -327,7 +314,6 @@ function updateScoreDisplay(){
   }
 }
 
-/* === GAME LOOP === */
 function gameLoop(){
   if(!running||paused)return;
 
@@ -348,13 +334,11 @@ function gameLoop(){
 
   player.style.top=y+"px";
 
-  /* Smooth tilt */
   let tiltVel=velocity*0.65;
   let angle=tiltVel*3.1;
   angle=Math.max(-32,Math.min(32,angle));
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
-  /* Falling skin */
   if(velocity>4){
     diveFrames++;
     if(diveFrames>12){
@@ -367,7 +351,6 @@ function gameLoop(){
     player.style.width=isPC?"100px":"85px";
   }
 
-  /* Center bonus */
   if(started){
     const midTop=window.innerHeight*0.40;
     const midBottom=window.innerHeight*0.60;
@@ -385,7 +368,6 @@ function gameLoop(){
     }
   }
 
-  /* Spawn planes */
   if(started && safeFrames>120){
     planeSpawnTimer++;
     if(planeSpawnTimer>Math.max(60,150-safeFrames/10)){
@@ -394,7 +376,6 @@ function gameLoop(){
     }
   }
 
-  /* Spawn bananas */
   if(started && safeFrames>200){
     bananaSpawnTimer++;
     if(bananaSpawnTimer>120){
@@ -403,13 +384,11 @@ function gameLoop(){
     }
   }
 
-  /* Move planes */
   for(let i=planes.length-1;i>=0;i--){
     const p=planes[i];
     let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
     p.style.left=left+"px";
 
-    /* Gap bonus only when passing through */
     if(left<150 && left>20 && !p.bonusGiven){
       p.bonusGiven=true;
 
@@ -442,7 +421,6 @@ function gameLoop(){
     }
   }
 
-  /* Move bananas */
   for(let i=bananas.length-1;i>=0;i--){
     const b=bananas[i];
     let left=parseFloat(b.style.left)-parseFloat(b.dataset.speed);
@@ -464,7 +442,6 @@ function gameLoop(){
     }
   }
 
-  /* Score over time */
   if(started){
     scoreTimer++;
     if(scoreTimer>=14){
@@ -477,7 +454,99 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-/* === START GAME === */
+function triggerDeath(){
+  if(!running)return;
+  running=false;
+  paused=false;
+
+  document.body.style.transition="0s";
+  document.body.style.transform="translate(10px)";
+  setTimeout(()=>document.body.style.transform="translate(-10px)",80);
+  setTimeout(()=>document.body.style.transform="translate(0)",160);
+
+  player.src="images/gor3-removebg-preview.png";
+  player.style.width=isPC?"100px":"85px";
+
+  let dv=0;
+  function fall(){
+    dv+=0.9;y+=dv;
+    player.style.top=y+"px";
+    player.style.transform=`translateY(-50%) rotate(15deg)`;
+    if(y<window.innerHeight+160)requestAnimationFrame(fall);
+    else startScrollDown();
+  }
+  fall();
+}
+
+function startScrollDown(){
+  if(score>bestScore){
+    bestScore=score;
+    localStorage.setItem("vg_best_score",String(bestScore));
+  }
+
+  const msgs=["You died L bozo","How r u so bad","My grandma can play better than u"];
+  document.querySelector("#deathText h1").textContent=msgs[Math.floor(Math.random()*msgs.length)];
+
+  scoreLine.textContent="Score: "+score;
+  bestScoreLine.textContent="Best Score: "+bestScore;
+  bananaLine.textContent="Bananas: "+bananasTotal;
+
+  player.style.display="none";
+
+  worldStack.style.transition="transform 2s ease-in";
+  worldStack.style.transform="translateY(-100vh)";
+}
+
+restartBtn.onclick=()=>{
+  worldStack.style.transition="transform 1s ease-out";
+  worldStack.style.transform="translateY(0)";
+
+  setTimeout(()=>{
+    planes.forEach(p=>p.remove());planes=[];
+    bananas.forEach(b=>b.remove());bananas=[];
+    planes=[];bananas=[];
+    y=window.innerHeight/2;
+    velocity=0;
+    started=false;
+    running=true;
+    paused=false;
+    score=0;
+    scoreTimer=0;
+    safeFrames=0;
+    lives=3;
+    middleTimer=0;
+    diveFrames=0;
+    bananaSpawnTimer=0;
+
+    updateHearts();
+
+    player.src="images/gor2-removebg-preview.png";
+    player.style.width=isPC?"100px":"85px";
+    player.style.display="block";
+    player.style.top=y+"px";
+    player.style.transform="translateY(-50%) rotate(0deg)";
+
+    scoreEl.style.color="#fff";
+    scoreEl.textContent="Score: 0";
+
+    pauseBtn.style.display="block";
+    pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+
+    requestAnimationFrame(gameLoop);
+
+    setTimeout(()=>{worldStack.style.transition="transform 2s ease-in";},50);
+  },900);
+};
+
+pauseBtn.onclick=()=>{
+  if(!running)return;
+  paused=!paused;
+  pauseBtn.innerHTML=paused
+    ? '<i class="fa-solid fa-play" style="color: rgb(30, 48, 80);"></i>'
+    : '<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+  if(!paused) requestAnimationFrame(gameLoop);
+};
+
 function startGameplay(){
   overlay.style.opacity="0";
   overlay.style.pointerEvents="none";
@@ -504,4 +573,30 @@ function startGameplay(){
   scoreEl.style.color="#fff";
   scoreEl.textContent="Score: 0";
 
-  player.src="images/gor2-removebg
+  player.src="images/gor2-removebg-preview.png";
+  player.style.width=isPC?"100px":"85px";
+  player.style.display="block";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+
+  pauseBtn.style.display="block";
+  pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+
+  requestAnimationFrame(gameLoop);
+}
+
+function showCutscene(){
+  overlay.style.opacity="1";
+  overlay.style.pointerEvents="auto";
+  skipBtn.style.display="block";
+  setTimeout(startGameplay,4000);
+}
+
+skipBtn.onclick=()=>{
+  startGameplay();
+};
+
+setTimeout(showCutscene,4500);
+</script>
+</body>
+</html>
