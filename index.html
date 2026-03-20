@@ -59,6 +59,24 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 
 .plane{position:absolute;width:140px;z-index:3;}
 
+#ground{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:180px;
+  background-image:url('images/dead gor.png');
+  background-size:cover;
+  background-position:bottom center;
+  background-repeat:repeat-x;
+  z-index:1;
+  animation:groundScroll 6s linear infinite;
+}
+@keyframes groundScroll{
+  from{background-position-x:0;}
+  to{background-position-x:-300px;}
+}
+
 #score{position:absolute;top:15px;left:20px;font-size:1.6rem;font-weight:700;color:#fff;z-index:5;}
 #hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;z-index:5;}
 
@@ -110,6 +128,7 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
         <div id="hearts">❤️❤️❤️</div>
         <div id="pauseBtn">⏸️</div>
         <img id="player" src="images/gor2-removebg-preview.png">
+        <div id="ground"></div>
       </div>
 
       <div id="deathScreen">
@@ -127,7 +146,6 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 </div>
 
 <script>
-/* === ELEMENTS === */
 const overlay=document.getElementById("overlay");
 const skipBtn=document.getElementById("skipBtn");
 const gameLayer=document.getElementById("gameLayer");
@@ -141,11 +159,10 @@ const pauseBtn=document.getElementById("pauseBtn");
 const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
 
-/* === GAME VARS === */
 let y=window.innerHeight/2;
 let velocity=0;
-let gravity=0.27;
-const flapStrength=-6.5;
+let gravity=0.25;
+const flapStrength=-7.2;
 
 let started=false,running=false,paused=false;
 let planes=[];
@@ -155,7 +172,6 @@ let middleTimer=0,diveFrames=0;
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-/* === INPUT === */
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
 });
@@ -168,10 +184,8 @@ function flap(){
   velocity=flapStrength;
 }
 
-/* === HEARTS === */
 function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
 
-/* === BONUS TEXT === */
 function flashBonus(text){
   const b=document.createElement("div");
   b.textContent=text;
@@ -189,7 +203,6 @@ function flashBonus(text){
   setTimeout(()=>b.remove(),1100);
 }
 
-/* === PLANE SPAWN === */
 function spawnPlane(){
   let maxPlanes=Math.min(6,2+Math.floor(safeFrames/400));
   if(planes.length>=maxPlanes)return;
@@ -211,7 +224,6 @@ function spawnPlane(){
   planes.push(plane);
 }
 
-/* === COLLISION === */
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=28;
@@ -221,7 +233,6 @@ function hit(a,b){
            ar.top+shrink>br.bottom-shrink);
 }
 
-/* === SCORE DISPLAY === */
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
@@ -232,13 +243,12 @@ function updateScoreDisplay(){
   }
 }
 
-/* === GAME LOOP === */
 function gameLoop(){
   if(!running||paused)return;
 
   safeFrames++;
 
-  if(isPC && score>bestScore-10) gravity=0.32; else gravity=0.27;
+  if(isPC && score>bestScore-10) gravity=0.32; else gravity=0.25;
 
   if(started){velocity+=gravity;y+=velocity;}
 
@@ -252,12 +262,11 @@ function gameLoop(){
   if(angle<-25)angle=-25;
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
-  /* === DIVE SKIN === */
   if(velocity>4){
     diveFrames++;
     if(diveFrames>25){
       player.src="images/gor3-removebg-preview.png";
-      player.style.width="110px";
+      player.style.width="125px";
     }
   }else{
     diveFrames=0;
@@ -265,24 +274,24 @@ function gameLoop(){
     player.style.width="110px";
   }
 
-  /* === MIDDLE BONUS === */
-  const midTop=window.innerHeight*0.40;
-  const midBottom=window.innerHeight*0.60;
+  if(started){
+    const midTop=window.innerHeight*0.40;
+    const midBottom=window.innerHeight*0.60;
 
-  if(y>midTop && y<midBottom){
-    middleTimer++;
-    if(middleTimer>=60){
-      score+=2;
-      flashBonus("CENTER +2");
+    if(y>midTop && y<midBottom){
+      middleTimer++;
+      if(middleTimer>=60){
+        score+=2;
+        flashBonus("CENTER +2");
+        middleTimer=0;
+        updateScoreDisplay();
+      }
+    }else{
       middleTimer=0;
-      updateScoreDisplay();
     }
-  }else{
-    middleTimer=0;
   }
 
-  /* === SPAWN PLANES === */
-  if(safeFrames>180){
+  if(started && safeFrames>180){
     planeSpawnTimer++;
     if(planeSpawnTimer>Math.max(80,180-safeFrames/8)){
       planeSpawnTimer=0;
@@ -290,19 +299,21 @@ function gameLoop(){
     }
   }
 
-  /* === PLANE MOVEMENT === */
   for(let i=planes.length-1;i>=0;i--){
     const p=planes[i];
     let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
     p.style.left=left+"px";
 
-    /* NARROW FIT BONUS */
     if(left<150 && !p.bonusGiven){
       p.bonusGiven=true;
       const gap=Math.abs(parseFloat(p.style.top)-y);
       if(gap<45){
         score+=10;
         flashBonus("NARROW FIT +10");
+        updateScoreDisplay();
+      }else if(gap<90){
+        score+=5;
+        flashBonus("GOOD GAP +5");
         updateScoreDisplay();
       }
     }
@@ -322,7 +333,6 @@ function gameLoop(){
     }
   }
 
-  /* === SCORE TICK === */
   if(started){
     scoreTimer++;
     if(scoreTimer>=14){
@@ -335,7 +345,6 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-/* === START GAME === */
 function startGameplay(){
   overlay.style.opacity="0";
   overlay.style.pointerEvents="none";
@@ -366,14 +375,13 @@ function startGameplay(){
   requestAnimationFrame(gameLoop);
 }
 
-/* === DEATH === */
 function triggerDeath(){
   if(!running)return;
   running=false;
   paused=false;
 
   player.src="images/gor3-removebg-preview.png";
-  player.style.width="110px";
+  player.style.width="125px";
 
   let dv=0;
   function fall(){
@@ -404,7 +412,6 @@ function startScrollDown(){
   worldStack.style.transform="translateY(-100vh)";
 }
 
-/* === RESTART === */
 restartBtn.onclick=()=>{
   worldStack.style.transition="transform 1s ease-out";
   worldStack.style.transform="translateY(0)";
@@ -443,7 +450,6 @@ restartBtn.onclick=()=>{
   },900);
 };
 
-/* === PAUSE === */
 pauseBtn.onclick=()=>{
   if(!running)return;
   paused=!paused;
@@ -451,7 +457,6 @@ pauseBtn.onclick=()=>{
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
-/* === CUTSCENE === */
 function showCutscene(){
   overlay.style.opacity="1";
   overlay.style.pointerEvents="auto";
@@ -463,7 +468,6 @@ skipBtn.onclick=()=>{
   if(overlay.style.opacity==="1") startGameplay();
 };
 
-/* === INTRO === */
 setTimeout(showCutscene,4500);
 </script>
 </body>
