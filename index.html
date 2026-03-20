@@ -10,23 +10,29 @@
 *{
   margin:0;padding:0;box-sizing:border-box;
   user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
-body{background:#000;overflow:hidden;font-family:sans-serif;-webkit-tap-highlight-color:transparent;}
+body{background:#000;overflow:hidden;font-family:sans-serif;}
 img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
 #scene{position:relative;width:100vw;height:100vh;overflow:hidden;background:#3aa0ff;}
 
-#gorillaIntro{position:absolute;width:260px;bottom:-220px;left:-220px;transform:rotate(25deg);opacity:0;
-animation:flyIntro 4s ease-out forwards;animation-delay:0.3s;}
+#gorillaIntro{
+  position:absolute;width:260px;bottom:-220px;left:-220px;
+  transform:rotate(25deg);opacity:0;
+  animation:flyIntro 4s ease-out forwards;animation-delay:0.3s;
+}
 @keyframes flyIntro{
   0%{bottom:-220px;left:-220px;opacity:1;}
   100%{bottom:100vh;left:100vw;opacity:0;}
 }
 
-#vanillaText{position:absolute;top:50%;left:50%;
-transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
-font-size:3.2rem;color:#fff;opacity:0;
-animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
+#vanillaText{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
+  font-size:3.2rem;color:#fff;opacity:0;
+  animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;
+}
 @keyframes vanillaSpin{
   0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
   30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
@@ -62,18 +68,15 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
 .plane{position:absolute;width:140px;z-index:3;}
 .banana{position:absolute;width:60px;z-index:3;}
 
-#ground{
-  position:absolute;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:180px;
-  background:#1f7a2e;
-  z-index:1;
+#score{
+  position:absolute;top:10px;left:20px;
+  font-size:1.6rem;font-weight:700;color:#fff;z-index:5;
 }
-
-#score{position:absolute;top:10px;left:20px;font-size:1.6rem;font-weight:700;color:#fff;z-index:5;}
-#bananaCount{position:absolute;top:42px;left:20px;font-size:1.3rem;color:#ffe066;z-index:5;display:flex;align-items:center;gap:6px;}
+#bananaCount{
+  position:absolute;top:42px;left:20px;
+  font-size:1.3rem;color:#ffe066;z-index:5;
+  display:flex;align-items:center;gap:6px;
+}
 #bananaCount img{width:26px;height:auto;}
 
 #hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;z-index:5;}
@@ -128,9 +131,10 @@ animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;}
           <span id="bananaText">Bananas: 0</span>
         </div>
         <div id="hearts">❤️❤️❤️</div>
-        <div id="pauseBtn"><i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i></div>
+        <div id="pauseBtn">
+          <i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>
+        </div>
         <img id="player" src="images/gor2-removebg-preview.png">
-        <div id="ground"></div>
       </div>
 
       <div id="deathScreen">
@@ -166,8 +170,8 @@ const bananaLine=document.getElementById("bananaLine");
 
 let y=window.innerHeight/2;
 let velocity=0;
-let gravity=0.24;
-const flapStrength=-6.8;
+let gravity=0.21;
+const flapStrength=-7.8;
 
 let started=false,running=false,paused=false;
 let planes=[];
@@ -229,8 +233,9 @@ function spawnPlane(){
   plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
 
-  let baseSpeed=3.4+Math.random()*1.8+Math.min(3.0,safeFrames/280);
-  if(isPC) baseSpeed*=1.1;
+  let baseSpeed=3.2+Math.random()*1.4+Math.min(3.0,safeFrames/300);
+  if(!isPC) baseSpeed*=0.75;   // mobile slower
+  else baseSpeed*=1.15;        // pc faster
   plane.dataset.speed=baseSpeed;
 
   gameWorld.appendChild(plane);
@@ -249,8 +254,8 @@ function spawnBanana(){
   banana.style.top=yPos+"px";
   banana.style.left=window.innerWidth+"px";
 
-  let speed=3.0+Math.random()*1.2+Math.min(2.0,safeFrames/350);
-  if(isPC) speed*=1.05;
+  let speed=2.8+Math.random()*1.2+Math.min(2.0,safeFrames/350);
+  if(!isPC) speed*=0.8;
   banana.dataset.speed=speed;
 
   gameWorld.appendChild(banana);
@@ -297,14 +302,14 @@ function gameLoop(){
 
   player.style.top=y+"px";
 
-  let angle=velocity*2.4;
-  if(angle>30)angle=30;
-  if(angle<-30)angle=-30;
+  let angle=velocity*3.2;
+  if(angle>35)angle=35;
+  if(angle<-35)angle=-35;
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
 
   if(velocity>4){
     diveFrames++;
-    if(diveFrames>20){
+    if(diveFrames>12){
       player.src="images/gor3-removebg-preview.png";
       player.style.width="120px";
     }
