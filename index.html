@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vanilla Gorilla</title>
-<link rel="icon" type="image/png" href="images/dead gor.png">
+<link rel="icon" type="image/png" href="images/goggg-removebg-preview.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
@@ -69,16 +69,24 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 .plane{position:absolute;width:120px;z-index:3;}
 .banana{position:absolute;width:55px;z-index:3;}
 
-.trail-dot{
+#megaWaveBanner{
   position:absolute;
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.35);
-  pointer-events:none;
-  z-index:2;
-  opacity:1;
-  transition:opacity 0.4s, transform 0.4s;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:8;
+  display:none;
+}
+
+.mega-shake{
+  animation:megaShake 0.6s linear infinite;
+}
+@keyframes megaShake{
+  0%{transform:translate(-50%,-50%) translateX(-4px);}
+  25%{transform:translate(-50%,-50%) translateX(4px);}
+  50%{transform:translate(-50%,-50%) translateX(-4px);}
+  75%{transform:translate(-50%,-50%) translateX(4px);}
+  100%{transform:translate(-50%,-50%) translateX(0);}
 }
 
 #score{
@@ -123,6 +131,97 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   margin-top:16px;padding:8px 16px;background:rgba(0,0,0,0.7);
   color:#fff;border:2px solid #fff;border-radius:4px;cursor:pointer;
 }
+
+#shopButton{
+  position:absolute;
+  bottom:18px;
+  right:18px;
+  width:70px;
+  height:70px;
+  cursor:pointer;
+  z-index:4;
+}
+
+#shopOverlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9;
+}
+
+#shopPanel{
+  background:#111;
+  border:2px solid #444;
+  border-radius:10px;
+  padding:16px 20px;
+  width:min(90vw,420px);
+  color:#fff;
+  text-align:center;
+  position:relative;
+}
+
+#shopTitle{
+  font-size:1.6rem;
+  margin-bottom:10px;
+}
+
+#shopSkinImage{
+  width:180px;
+  height:auto;
+  display:block;
+  margin:0 auto 10px auto;
+}
+
+#shopInfo{
+  margin-bottom:10px;
+  font-size:1.1rem;
+}
+
+.shop-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:32px;
+  height:32px;
+  border-radius:4px;
+  border:2px solid #fff;
+  background:#000;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:1.2rem;
+}
+#shopPrev{left:10px;}
+#shopNext{right:10px;}
+
+#shopActionBtn{
+  margin-top:6px;
+  padding:6px 14px;
+  border-radius:4px;
+  border:2px solid #fff;
+  background:#222;
+  color:#fff;
+  cursor:pointer;
+}
+
+#shopLock{
+  margin-top:4px;
+  font-size:1.1rem;
+}
+
+#shopClose{
+  position:absolute;
+  top:6px;
+  right:8px;
+  cursor:pointer;
+  font-size:1.1rem;
+  color:#aaa;
+}
 </style>
 </head>
 <body>
@@ -143,11 +242,12 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
           <img src="images/bbb-removebg-preview.png" alt="">
           <span id="bananaText">Bananas: 0</span>
         </div>
-        <div id="hearts">❤️❤️❤️</div>
+        <div id="hearts">3</div>
         <div id="pauseBtn">
           <i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>
         </div>
-        <img id="player" src="images/gor2-removebg-preview.png">
+        <img id="player" src="images/goggg-removebg-preview.png">
+        <img id="megaWaveBanner" src="images/meg-removebg-preview.png" alt="">
       </div>
 
       <div id="deathScreen">
@@ -159,8 +259,22 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
           <button id="restartBtn">Go again</button>
         </div>
         <div id="deathGround"></div>
+        <img id="shopButton" src="images/shop-removebg-preview.png" alt="">
       </div>
 
+    </div>
+  </div>
+
+  <div id="shopOverlay">
+    <div id="shopPanel">
+      <div id="shopClose">X</div>
+      <div id="shopTitle">Gorilla Skins</div>
+      <div id="shopPrev" class="shop-arrow"><span>&lt;</span></div>
+      <div id="shopNext" class="shop-arrow"><span>&gt;</span></div>
+      <img id="shopSkinImage" src="" alt="">
+      <div id="shopInfo"></div>
+      <div id="shopLock"></div>
+      <button id="shopActionBtn"></button>
     </div>
   </div>
 </div>
@@ -180,12 +294,22 @@ const scoreLine=document.getElementById("scoreLine");
 const bestScoreLine=document.getElementById("bestScoreLine");
 const bananaText=document.getElementById("bananaText");
 const bananaLine=document.getElementById("bananaLine");
+const megaWaveBanner=document.getElementById("megaWaveBanner");
+const shopButton=document.getElementById("shopButton");
+const shopOverlay=document.getElementById("shopOverlay");
+const shopSkinImage=document.getElementById("shopSkinImage");
+const shopInfo=document.getElementById("shopInfo");
+const shopLock=document.getElementById("shopLock");
+const shopActionBtn=document.getElementById("shopActionBtn");
+const shopPrev=document.getElementById("shopPrev");
+const shopNext=document.getElementById("shopNext");
+const shopClose=document.getElementById("shopClose");
 
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if (!isPC) {
-  player.style.width = "85px";
-  player.style.left = "110px";
+  player.style.width = "70px";
+  player.style.left = "90px";
 } else {
   player.style.width = "100px";
   player.style.left = "150px";
@@ -209,10 +333,58 @@ let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
 
 bananaText.textContent="Bananas: "+bananasTotal;
 
-/* combo system */
 let comboCount=0;
 let lastGapFrame=0;
 let frameCounter=0;
+
+let planePassCount=0;
+let inMegaWave=false;
+let megaWaveTimer=0;
+
+const SKINS=[
+  {
+    id:"vanilla",
+    name:"Vanilla Gorilla",
+    price:0,
+    unlocked:true,
+    fly:"images/goggg-removebg-preview.png",
+    fall:"images/goggg-removebg-preview.png",
+    dead:"images/dead gor.png"
+  },
+  {
+    id:"spider",
+    name:"Spider Gorilla",
+    price:100,
+    unlocked:false,
+    fly:"images/flyspider-removebg-preview.png",
+    fall:"images/flyspider-removebg-preview.png",
+    dead:"images/spider-removebg-preview.png"
+  }
+];
+
+let ownedSkinsJSON=localStorage.getItem("vg_owned_skins");
+let ownedSkins=ownedSkinsJSON?JSON.parse(ownedSkinsJSON):["vanilla"];
+SKINS.forEach(s=>{if(ownedSkins.includes(s.id))s.unlocked=true;});
+
+let currentSkinId=localStorage.getItem("vg_current_skin")||"vanilla";
+let currentSkinIndex=SKINS.findIndex(s=>s.id===currentSkinId);
+if(currentSkinIndex<0)currentSkinIndex=0;
+
+function applyCurrentSkin(falling=false,dead=false){
+  const skin=SKINS[currentSkinIndex];
+  if(dead){
+    player.src=skin.dead;
+  }else if(falling){
+    player.src=skin.fall;
+    if(skin.id==="spider"){
+      player.style.transform="translateY(-50%) rotate(180deg)";
+    }
+  }else{
+    player.src=skin.fly;
+  }
+}
+
+applyCurrentSkin(false,false);
 
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
@@ -225,8 +397,7 @@ function flap(){
   started=true;
   velocity=flapStrength;
 }
-
-function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
+function updateHearts(){heartsEl.textContent=String(lives);}
 
 function flashBonus(text,color="yellow"){
   const b=document.createElement("div");
@@ -245,8 +416,8 @@ function flashBonus(text,color="yellow"){
   setTimeout(()=>b.remove(),1100);
 }
 
-function spawnPlane(){
-  let maxPlanes=Math.min(7,2+Math.floor(safeFrames/350));
+function spawnPlane(isMega=false){
+  let maxPlanes=isMega?12:Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
 
   const plane=document.createElement("img");
@@ -260,8 +431,14 @@ function spawnPlane(){
   plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
 
-  let baseSpeed=3.0 + Math.random()*2.0 + Math.min(3.0,safeFrames/300);
-  if(!isPC) baseSpeed*=0.70;
+  let baseSpeed;
+  if(isMega){
+    baseSpeed=3+Math.random()*5;
+  }else{
+    baseSpeed=2.4+Math.random()*2.6+Math.min(3.0,safeFrames/300);
+  }
+
+  if(!isPC) baseSpeed*=0.7;
   else baseSpeed*=1.18;
 
   plane.dataset.speed=baseSpeed;
@@ -311,25 +488,26 @@ function hitBanana(a,b){
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
-    scoreEl.innerHTML=`<i class="fa-solid fa-crown" style="color:rgb(255,212,59);margin-right:6px;"></i> Score: ${score}`;
+    scoreEl.innerHTML='<i class="fa-solid fa-crown" style="color:rgb(255,212,59);margin-right:6px;"></i> Score: '+score;
   }else{
     scoreEl.style.color="#fff";
     scoreEl.textContent="Score: "+score;
   }
 }
 
-function spawnTrailDot(){
-  const rect=player.getBoundingClientRect();
-  const dot=document.createElement("div");
-  dot.className="trail-dot";
-  dot.style.left=(rect.left+rect.width*0.2)+"px";
-  dot.style.top=(rect.top+rect.height*0.55)+"px";
-  gameWorld.appendChild(dot);
-  requestAnimationFrame(()=>{
-    dot.style.opacity="0";
-    dot.style.transform="translateX(-10px)";
-  });
-  setTimeout(()=>dot.remove(),450);
+function startMegaWave(){
+  inMegaWave=true;
+  megaWaveTimer=0;
+  megaWaveBanner.style.display="block";
+  megaWaveBanner.classList.add("mega-shake");
+  for(let i=0;i<8;i++){
+    setTimeout(()=>spawnPlane(true),i*120);
+  }
+  setTimeout(()=>{
+    megaWaveBanner.style.display="none";
+    megaWaveBanner.classList.remove("mega-shake");
+    inMegaWave=false;
+  },2500);
 }
 
 function gameLoop(){
@@ -356,22 +534,16 @@ function gameLoop(){
   let tiltVel=velocity*0.65;
   let angle=tiltVel*3.1;
   angle=Math.max(-32,Math.min(32,angle));
-  player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
-
-  if(Math.abs(velocity)>4.5){
-    spawnTrailDot();
-  }
+  player.style.transform='translateY(-50%) rotate('+angle+'deg)';
 
   if(velocity>4){
     diveFrames++;
     if(diveFrames>12){
-      player.src="images/gor3-removebg-preview.png";
-      player.style.width=isPC?"100px":"85px";
+      applyCurrentSkin(true,false);
     }
   }else{
     diveFrames=0;
-    player.src="images/gor2-removebg-preview.png";
-    player.style.width=isPC?"100px":"85px";
+    applyCurrentSkin(false,false);
   }
 
   if(started){
@@ -391,11 +563,11 @@ function gameLoop(){
     }
   }
 
-  if(started && safeFrames>120){
+  if(started && safeFrames>120 && !inMegaWave){
     planeSpawnTimer++;
-    if(planeSpawnTimer>Math.max(60,150-safeFrames/10)){
+    if(planeSpawnTimer>Math.max(50,140-safeFrames/10)){
       planeSpawnTimer=0;
-      spawnPlane();
+      spawnPlane(false);
     }
   }
 
@@ -433,6 +605,10 @@ function gameLoop(){
         score+=5;
         flashBonus("GOOD GAP +5","yellow");
         gotGood=true;
+      }else if(gap<160){
+        score+=2;
+        flashBonus("NEAR MISS +2","#9cf");
+        gotGood=true;
       }
 
       if(gotGood){
@@ -449,6 +625,13 @@ function gameLoop(){
         updateScoreDisplay();
       }else{
         comboCount=0;
+      }
+
+      planePassCount++;
+      if(planePassCount%125===0){
+        if(Math.random()<0.5 && !inMegaWave){
+          startMegaWave();
+        }
       }
     }
 
@@ -483,7 +666,7 @@ function gameLoop(){
       bananasTotal++;
       localStorage.setItem("vg_bananas",String(bananasTotal));
       bananaText.textContent="Bananas: "+bananasTotal;
-      flashBonus("+1 🍌","gold");
+      flashBonus("+1 banana","gold");
       b.remove();
       bananas.splice(i,1);
     }
@@ -511,14 +694,13 @@ function triggerDeath(){
   setTimeout(()=>document.body.style.transform="translate(-10px)",80);
   setTimeout(()=>document.body.style.transform="translate(0)",160);
 
-  player.src="images/gor3-removebg-preview.png";
-  player.style.width=isPC?"100px":"85px";
+  applyCurrentSkin(true,true);
 
   let dv=0;
   function fall(){
     dv+=0.9;y+=dv;
     player.style.top=y+"px";
-    player.style.transform=`translateY(-50%) rotate(15deg)`;
+    player.style.transform='translateY(-50%) rotate(15deg)';
     if(y<window.innerHeight+160)requestAnimationFrame(fall);
     else startScrollDown();
   }
@@ -551,7 +733,6 @@ restartBtn.onclick=()=>{
   setTimeout(()=>{
     planes.forEach(p=>p.remove());planes=[];
     bananas.forEach(b=>b.remove());bananas=[];
-    planes=[];bananas=[];
     y=window.innerHeight/2;
     velocity=0;
     started=false;
@@ -567,14 +748,23 @@ restartBtn.onclick=()=>{
     comboCount=0;
     lastGapFrame=0;
     frameCounter=0;
+    planePassCount=0;
+    inMegaWave=false;
+    megaWaveTimer=0;
 
     updateHearts();
 
-    player.src="images/gor2-removebg-preview.png";
-    player.style.width=isPC?"100px":"85px";
+    applyCurrentSkin(false,false);
     player.style.display="block";
     player.style.top=y+"px";
     player.style.transform="translateY(-50%) rotate(0deg)";
+    if(!isPC){
+      player.style.width="70px";
+      player.style.left="90px";
+    }else{
+      player.style.width="100px";
+      player.style.left="150px";
+    }
 
     scoreEl.style.color="#fff";
     scoreEl.textContent="Score: 0";
@@ -619,6 +809,9 @@ function startGameplay(){
   comboCount=0;
   lastGapFrame=0;
   frameCounter=0;
+  planePassCount=0;
+  inMegaWave=false;
+  megaWaveTimer=0;
 
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
@@ -626,11 +819,17 @@ function startGameplay(){
   scoreEl.style.color="#fff";
   scoreEl.textContent="Score: 0";
 
-  player.src="images/gor2-removebg-preview.png";
-  player.style.width=isPC?"100px":"85px";
+  applyCurrentSkin(false,false);
   player.style.display="block";
   player.style.top=y+"px";
   player.style.transform="translateY(-50%) rotate(0deg)";
+  if(!isPC){
+    player.style.width="70px";
+    player.style.left="90px";
+  }else{
+    player.style.width="100px";
+    player.style.left="150px";
+  }
 
   pauseBtn.style.display="block";
   pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
@@ -648,6 +847,67 @@ function showCutscene(){
 skipBtn.onclick=()=>{startGameplay();};
 
 setTimeout(showCutscene,4500);
+
+/* SHOP LOGIC */
+
+function updateShopUI(){
+  const skin=SKINS[currentSkinIndex];
+  shopSkinImage.src=skin.fly;
+  shopInfo.textContent=skin.name+" - "+skin.price+" bananas";
+  if(skin.unlocked){
+    shopLock.textContent="";
+    if(currentSkinId===skin.id){
+      shopActionBtn.textContent="Equipped";
+      shopActionBtn.disabled=true;
+    }else{
+      shopActionBtn.textContent="Equip";
+      shopActionBtn.disabled=false;
+    }
+  }else{
+    shopLock.textContent="Locked";
+    shopActionBtn.textContent="Buy";
+    shopActionBtn.disabled=false;
+  }
+}
+
+shopButton.onclick=()=>{
+  shopOverlay.style.display="flex";
+  updateShopUI();
+};
+
+shopClose.onclick=()=>{
+  shopOverlay.style.display="none";
+};
+
+shopPrev.onclick=()=>{
+  currentSkinIndex=(currentSkinIndex-1+SKINS.length)%SKINS.length;
+  updateShopUI();
+};
+
+shopNext.onclick=()=>{
+  currentSkinIndex=(currentSkinIndex+1)%SKINS.length;
+  updateShopUI();
+};
+
+shopActionBtn.onclick=()=>{
+  const skin=SKINS[currentSkinIndex];
+  if(skin.unlocked){
+    currentSkinId=skin.id;
+    localStorage.setItem("vg_current_skin",currentSkinId);
+    applyCurrentSkin(false,false);
+    updateShopUI();
+  }else{
+    if(bananasTotal>=skin.price){
+      bananasTotal-=skin.price;
+      bananaText.textContent="Bananas: "+bananasTotal;
+      localStorage.setItem("vg_bananas",String(bananasTotal));
+      skin.unlocked=true;
+      ownedSkins.push(skin.id);
+      localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
+      updateShopUI();
+    }
+  }
+};
 </script>
 </body>
 </html>
