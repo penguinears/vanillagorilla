@@ -246,7 +246,7 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
         <div id="pauseBtn">
           <i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>
         </div>
-        <img id="player" src="images/goggg-removebg-preview.png">
+        <img id="player" src="images/gor2-removebg-preview.png">
         <img id="megaWaveBanner" src="images/meg-removebg-preview.png" alt="">
       </div>
 
@@ -347,8 +347,9 @@ const SKINS=[
     name:"Vanilla Gorilla",
     price:0,
     unlocked:true,
-    fly:"images/goggg-removebg-preview.png",
-    fall:"images/goggg-removebg-preview.png",
+    icon:"images/goggg-removebg-preview.png",
+    fly:"images/gor2-removebg-preview.png",
+    fall:"images/gor3-removebg-preview.png",
     dead:"images/dead gor.png"
   },
   {
@@ -356,6 +357,7 @@ const SKINS=[
     name:"Spider Gorilla",
     price:100,
     unlocked:false,
+    icon:"images/spider-removebg-preview.png",
     fly:"images/flyspider-removebg-preview.png",
     fall:"images/flyspider-removebg-preview.png",
     dead:"images/spider-removebg-preview.png"
@@ -367,11 +369,16 @@ let ownedSkins=ownedSkinsJSON?JSON.parse(ownedSkinsJSON):["vanilla"];
 SKINS.forEach(s=>{if(ownedSkins.includes(s.id))s.unlocked=true;});
 
 let currentSkinId=localStorage.getItem("vg_current_skin")||"vanilla";
-let currentSkinIndex=SKINS.findIndex(s=>s.id===currentSkinId);
-if(currentSkinIndex<0)currentSkinIndex=0;
+if(!ownedSkins.includes(currentSkinId)) currentSkinId="vanilla";
+
+function getCurrentSkin(){
+  return SKINS.find(s=>s.id===currentSkinId) || SKINS[0];
+}
+
+let shopIndex=0;
 
 function applyCurrentSkin(falling=false,dead=false){
-  const skin=SKINS[currentSkinIndex];
+  const skin=getCurrentSkin();
   if(dead){
     player.src=skin.dead;
   }else if(falling){
@@ -397,6 +404,7 @@ function flap(){
   started=true;
   velocity=flapStrength;
 }
+
 function updateHearts(){heartsEl.textContent=String(lives);}
 
 function flashBonus(text,color="yellow"){
@@ -851,8 +859,8 @@ setTimeout(showCutscene,4500);
 /* SHOP LOGIC */
 
 function updateShopUI(){
-  const skin=SKINS[currentSkinIndex];
-  shopSkinImage.src=skin.fly;
+  const skin=SKINS[shopIndex];
+  shopSkinImage.src=skin.icon;
   shopInfo.textContent=skin.name+" - "+skin.price+" bananas";
   if(skin.unlocked){
     shopLock.textContent="";
@@ -880,17 +888,17 @@ shopClose.onclick=()=>{
 };
 
 shopPrev.onclick=()=>{
-  currentSkinIndex=(currentSkinIndex-1+SKINS.length)%SKINS.length;
+  shopIndex=(shopIndex-1+SKINS.length)%SKINS.length;
   updateShopUI();
 };
 
 shopNext.onclick=()=>{
-  currentSkinIndex=(currentSkinIndex+1)%SKINS.length;
+  shopIndex=(shopIndex+1)%SKINS.length;
   updateShopUI();
 };
 
 shopActionBtn.onclick=()=>{
-  const skin=SKINS[currentSkinIndex];
+  const skin=SKINS[shopIndex];
   if(skin.unlocked){
     currentSkinId=skin.id;
     localStorage.setItem("vg_current_skin",currentSkinId);
@@ -902,8 +910,10 @@ shopActionBtn.onclick=()=>{
       bananaText.textContent="Bananas: "+bananasTotal;
       localStorage.setItem("vg_bananas",String(bananasTotal));
       skin.unlocked=true;
-      ownedSkins.push(skin.id);
-      localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
+      if(!ownedSkins.includes(skin.id)){
+        ownedSkins.push(skin.id);
+        localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
+      }
       updateShopUI();
     }
   }
