@@ -8,11 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-*{
-  margin:0;padding:0;box-sizing:border-box;
-  user-select:none;-webkit-user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
 body{background:#000;overflow:hidden;font-family:sans-serif;}
 img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
@@ -70,16 +66,19 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   z-index:4;
 }
 
-.plane{
-  position:absolute;
-  width:120px;
-  z-index:3;
-}
+.plane{position:absolute;width:120px;z-index:3;}
+.banana{position:absolute;width:55px;z-index:3;}
 
-.banana{
+.trail-dot{
   position:absolute;
-  width:55px;
-  z-index:3;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.35);
+  pointer-events:none;
+  z-index:2;
+  opacity:1;
+  transition:opacity 0.4s, transform 0.4s;
 }
 
 #score{
@@ -210,6 +209,11 @@ let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
 
 bananaText.textContent="Bananas: "+bananasTotal;
 
+/* combo system */
+let comboCount=0;
+let lastGapFrame=0;
+let frameCounter=0;
+
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
 });
@@ -224,13 +228,13 @@ function flap(){
 
 function updateHearts(){heartsEl.textContent="❤️".repeat(lives);}
 
-function flashBonus(text){
+function flashBonus(text,color="yellow"){
   const b=document.createElement("div");
   b.textContent=text;
   b.style.position="absolute";
   b.style.left="180px";
   b.style.top=(y-40)+"px";
-  b.style.color="yellow";
+  b.style.color=color;
   b.style.fontSize="1.4rem";
   b.style.fontWeight="700";
   b.style.zIndex="10";
@@ -314,9 +318,24 @@ function updateScoreDisplay(){
   }
 }
 
+function spawnTrailDot(){
+  const rect=player.getBoundingClientRect();
+  const dot=document.createElement("div");
+  dot.className="trail-dot";
+  dot.style.left=(rect.left+rect.width*0.2)+"px";
+  dot.style.top=(rect.top+rect.height*0.55)+"px";
+  gameWorld.appendChild(dot);
+  requestAnimationFrame(()=>{
+    dot.style.opacity="0";
+    dot.style.transform="translateX(-10px)";
+  });
+  setTimeout(()=>dot.remove(),450);
+}
+
 function gameLoop(){
   if(!running||paused)return;
 
+  frameCounter++;
   safeFrames++;
 
   velocity+=gravity;
@@ -338,6 +357,10 @@ function gameLoop(){
   let angle=tiltVel*3.1;
   angle=Math.max(-32,Math.min(32,angle));
   player.style.transform=`translateY(-50%) rotate(${angle}deg)`;
+
+  if(Math.abs(velocity)>4.5){
+    spawnTrailDot();
+  }
 
   if(velocity>4){
     diveFrames++;
@@ -384,6 +407,10 @@ function gameLoop(){
     }
   }
 
+  if(frameCounter-lastGapFrame>180){
+    comboCount=0;
+  }
+
   for(let i=planes.length-1;i>=0;i--){
     const p=planes[i];
     let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
@@ -396,14 +423,33 @@ function gameLoop(){
       const planeCenter=parseFloat(p.style.top)+60;
       const gap=Math.abs(gorCenter-planeCenter);
 
+      let gotGood=false;
+
       if(gap<40){
         score+=10;
-        flashBonus("NARROW FIT +10");
+        flashBonus("NARROW FIT +10","orange");
+        gotGood=true;
       }else if(gap<100){
         score+=5;
-        flashBonus("GOOD GAP +5");
+        flashBonus("GOOD GAP +5","yellow");
+        gotGood=true;
       }
-      updateScoreDisplay();
+
+      if(gotGood){
+        comboCount++;
+        lastGapFrame=frameCounter;
+
+        if(comboCount===3){
+          score+=5;
+          flashBonus("COMBO x3 +5","lime");
+        }else if(comboCount===5){
+          score+=10;
+          flashBonus("COMBO x5 +10","lime");
+        }
+        updateScoreDisplay();
+      }else{
+        comboCount=0;
+      }
     }
 
     if(left<-250){
@@ -417,6 +463,7 @@ function gameLoop(){
       updateHearts();
       p.remove();
       planes.splice(i,1);
+      comboCount=0;
       if(lives<=0){triggerDeath();return;}
     }
   }
@@ -436,7 +483,7 @@ function gameLoop(){
       bananasTotal++;
       localStorage.setItem("vg_bananas",String(bananasTotal));
       bananaText.textContent="Bananas: "+bananasTotal;
-      flashBonus("+1 🍌");
+      flashBonus("+1 🍌","gold");
       b.remove();
       bananas.splice(i,1);
     }
@@ -517,6 +564,9 @@ restartBtn.onclick=()=>{
     middleTimer=0;
     diveFrames=0;
     bananaSpawnTimer=0;
+    comboCount=0;
+    lastGapFrame=0;
+    frameCounter=0;
 
     updateHearts();
 
@@ -566,6 +616,9 @@ function startGameplay(){
   middleTimer=0;
   diveFrames=0;
   bananaSpawnTimer=0;
+  comboCount=0;
+  lastGapFrame=0;
+  frameCounter=0;
 
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
@@ -592,9 +645,7 @@ function showCutscene(){
   setTimeout(startGameplay,4000);
 }
 
-skipBtn.onclick=()=>{
-  startGameplay();
-};
+skipBtn.onclick=()=>{startGameplay();};
 
 setTimeout(showCutscene,4500);
 </script>
