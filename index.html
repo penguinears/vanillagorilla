@@ -435,7 +435,6 @@ img{
 </div>
 
 <script>
-/********** ELEMENTS **********/
 const overlay=document.getElementById("overlay");
 const skipBtn=document.getElementById("skipBtn");
 const gameLayer=document.getElementById("gameLayer");
@@ -461,10 +460,8 @@ const shopPrev=document.getElementById("shopPrev");
 const shopNext=document.getElementById("shopNext");
 const shopClose=document.getElementById("shopClose");
 
-/********** DEVICE CHECK **********/
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-/********** PLAYER SIZE **********/
 if (!isPC) {
   player.style.width = "70px";
   player.style.left = "90px";
@@ -473,7 +470,6 @@ if (!isPC) {
   player.style.left = "150px";
 }
 
-/********** GAME VARS **********/
 let y=window.innerHeight/2;
 let velocity=0;
 
@@ -498,7 +494,6 @@ let frameCounter=0;
 let planePassCount=0;
 let inMegaWave=false;
 
-/********** SKINS **********/
 const SKINS=[
   {
     id:"vanilla",
@@ -535,7 +530,6 @@ function getCurrentSkin(){
 
 let shopIndex=0;
 
-/********** APPLY SKIN **********/
 function applyCurrentSkin(falling=false,dead=false){
   const skin=getCurrentSkin();
   if(dead){
@@ -552,7 +546,6 @@ function applyCurrentSkin(falling=false,dead=false){
 
 applyCurrentSkin(false,false);
 
-/********** INPUT **********/
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
 });
@@ -568,12 +561,10 @@ function flap(){
   velocity=flapStrength;
 }
 
-/********** HEARTS **********/
 function updateHearts(){
   heartsEl.textContent="❤️".repeat(lives);
 }
 
-/********** BONUS TEXT **********/
 function flashBonus(text,color="yellow"){
   const b=document.createElement("div");
   b.textContent=text;
@@ -591,7 +582,6 @@ function flashBonus(text,color="yellow"){
   setTimeout(()=>b.remove(),1100);
 }
 
-/********** SPAWN PLANE **********/
 function spawnPlane(isMega=false){
   let maxPlanes=isMega?12:Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
@@ -624,7 +614,6 @@ function spawnPlane(isMega=false){
   planes.push(plane);
 }
 
-/********** SPAWN BANANA **********/
 function spawnBanana(){
   const banana=document.createElement("img");
   banana.src="images/bbb-removebg-preview.png";
@@ -645,7 +634,6 @@ function spawnBanana(){
   bananas.push(banana);
 }
 
-/********** COLLISION **********/
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=26;
@@ -664,7 +652,6 @@ function hitBanana(a,b){
            ar.top+shrink>br.bottom-shrink);
 }
 
-/********** SCORE DISPLAY **********/
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
@@ -675,7 +662,6 @@ function updateScoreDisplay(){
   }
 }
 
-/********** MEGA WAVE **********/
 function startMegaWave(){
   inMegaWave=true;
   megaWaveBanner.style.display="block";
@@ -692,7 +678,6 @@ function startMegaWave(){
   },2500);
 }
 
-/********** GAME LOOP **********/
 function gameLoop(){
   if(!running||paused)return;
 
@@ -867,7 +852,6 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-/********** DEATH **********/
 function triggerDeath(){
   if(!running)return;
   running=false;
@@ -910,7 +894,6 @@ function startScrollDown(){
   worldStack.style.transform="translateY(-100vh)";
 }
 
-/********** RESTART **********/
 restartBtn.onclick=()=>{
   worldStack.style.transition="transform 1s ease-out";
   worldStack.style.transform="translateY(0)";
@@ -962,7 +945,6 @@ restartBtn.onclick=()=>{
   },900);
 };
 
-/********** PAUSE **********/
 pauseBtn.onclick=()=>{
   if(!running)return;
   paused=!paused;
@@ -972,7 +954,6 @@ pauseBtn.onclick=()=>{
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
-/********** START GAME **********/
 let cutsceneTimeout=null;
 
 function startGameplay(){
@@ -1008,3 +989,99 @@ function startGameplay(){
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
   bananas.forEach(b=>b.remove());bananas=[];
+  scoreEl.style.color="#fff";
+  scoreEl.textContent="Score: 0";
+
+  applyCurrentSkin(false,false);
+  player.style.display="block";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  if(!isPC){
+    player.style.width="70px";
+    player.style.left="90px";
+  }else{
+    player.style.width="100px";
+    player.style.left="150px";
+  }
+
+  pauseBtn.style.display="block";
+  pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+
+  requestAnimationFrame(gameLoop);
+}
+
+function showCutscene(){
+  overlay.style.opacity="1";
+  overlay.style.pointerEvents="auto";
+  skipBtn.style.display="block";
+  setTimeout(startGameplay,4000);
+}
+
+skipBtn.onclick=()=>{startGameplay();};
+
+cutsceneTimeout=setTimeout(showCutscene,4500);
+
+/* SHOP LOGIC */
+function updateShopUI(){
+  const skin=SKINS[shopIndex];
+  shopSkinImage.src=skin.icon;
+  shopInfo.textContent=skin.name+" - "+skin.price+" bananas";
+  if(skin.unlocked){
+    shopLock.textContent="";
+    if(currentSkinId===skin.id){
+      shopActionBtn.textContent="Equipped";
+      shopActionBtn.disabled=true;
+    }else{
+      shopActionBtn.textContent="Equip";
+      shopActionBtn.disabled=false;
+    }
+  }else{
+    shopLock.textContent="Locked";
+    shopActionBtn.textContent="Buy";
+    shopActionBtn.disabled=false;
+  }
+}
+
+shopButton.onclick=()=>{
+  shopOverlay.style.display="flex";
+  updateShopUI();
+};
+
+shopClose.onclick=()=>{
+  shopOverlay.style.display="none";
+};
+
+shopPrev.onclick=()=>{
+  shopIndex=(shopIndex-1+SKINS.length)%SKINS.length;
+  updateShopUI();
+};
+
+shopNext.onclick=()=>{
+  shopIndex=(shopIndex+1)%SKINS.length;
+  updateShopUI();
+};
+
+shopActionBtn.onclick=()=>{
+  const skin=SKINS[shopIndex];
+  if(skin.unlocked){
+    currentSkinId=skin.id;
+    localStorage.setItem("vg_current_skin",currentSkinId);
+    applyCurrentSkin(false,false);
+    updateShopUI();
+  }else{
+    if(bananasTotal>=skin.price){
+      bananasTotal-=skin.price;
+      bananaText.textContent="Bananas: "+bananasTotal;
+      localStorage.setItem("vg_bananas",String(bananasTotal));
+      skin.unlocked=true;
+      if(!ownedSkins.includes(skin.id)){
+        ownedSkins.push(skin.id);
+        localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
+      }
+      updateShopUI();
+    }
+  }
+};
+</script>
+</body>
+</html>
