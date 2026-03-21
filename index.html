@@ -8,16 +8,43 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
-body{background:#000;overflow:hidden;font-family:sans-serif;}
-img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body{
+  background:#000;
+  overflow:hidden;
+  font-family:sans-serif;
+}
+img{
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
 
-#scene{position:relative;width:100vw;height:100vh;overflow:hidden;background:#3aa0ff;}
+#scene{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:#3aa0ff;
+}
 
+/* INTRO ANIMATIONS */
 #gorillaIntro{
-  position:absolute;width:240px;bottom:-220px;left:-220px;
-  transform:rotate(25deg);opacity:0;
-  animation:flyIntro 4s ease-out forwards;animation-delay:0.3s;
+  position:absolute;
+  width:240px;
+  bottom:-220px;
+  left:-220px;
+  transform:rotate(25deg);
+  opacity:0;
+  animation:flyIntro 4s ease-out forwards;
+  animation-delay:0.3s;
 }
 @keyframes flyIntro{
   0%{bottom:-220px;left:-220px;opacity:1;}
@@ -25,10 +52,15 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 }
 
 #vanillaText{
-  position:absolute;top:50%;left:50%;
+  position:absolute;
+  top:50%;
+  left:50%;
   transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
-  font-size:3.2rem;color:#fff;opacity:0;
-  animation:vanillaSpin 2.5s ease-out forwards;animation-delay:2s;
+  font-size:3.2rem;
+  color:#fff;
+  opacity:0;
+  animation:vanillaSpin 2.5s ease-out forwards;
+  animation-delay:2s;
 }
 @keyframes vanillaSpin{
   0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
@@ -37,25 +69,66 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
 }
 
+/* OVERLAY */
 #overlay{
-  position:absolute;inset:0;background:#000;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;color:#fff;font-size:1.6rem;
-  opacity:0;pointer-events:none;transition:opacity 0.6s;
+  position:absolute;
+  inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  font-size:1.6rem;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.6s;
   z-index:5;
 }
 
 #skipBtn{
-  position:absolute;bottom:15px;right:15px;
-  padding:8px 14px;background:rgba(0,0,0,0.7);
-  color:#fff;border:2px solid #fff;border-radius:4px;
-  cursor:pointer;z-index:6;display:none;
+  position:absolute;
+  bottom:15px;
+  right:15px;
+  padding:8px 14px;
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  border:2px solid #fff;
+  border-radius:4px;
+  cursor:pointer;
+  z-index:6;
+  display:none;
 }
 
-#gameLayer{position:absolute;inset:0;background:#3aa0ff;display:none;overflow:hidden;z-index:3;}
-#worldStack{position:absolute;left:0;top:0;width:100%;height:200vh;transition:transform 0s;}
-#gameWorld{position:absolute;left:0;top:0;width:100%;height:100vh;overflow:hidden;}
+/* GAME LAYER */
+#gameLayer{
+  position:absolute;
+  inset:0;
+  background:#3aa0ff;
+  display:none;
+  overflow:hidden;
+  z-index:3;
+}
 
+#worldStack{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:200vh;
+  transition:transform 0s;
+}
+
+#gameWorld{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* PLAYER */
 #player{
   position:absolute;
   width:100px;
@@ -66,9 +139,19 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   z-index:4;
 }
 
-.plane{position:absolute;width:120px;z-index:3;}
-.banana{position:absolute;width:55px;z-index:3;}
+/* OBJECTS */
+.plane{
+  position:absolute;
+  width:120px;
+  z-index:3;
+}
+.banana{
+  position:absolute;
+  width:55px;
+  z-index:3;
+}
 
+/* MEGA WAVE */
 #megaWaveBanner{
   position:absolute;
   top:50%;
@@ -77,7 +160,6 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   z-index:8;
   display:none;
 }
-
 .mega-shake{
   animation:megaShake 0.6s linear infinite;
 }
@@ -89,49 +171,109 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   100%{transform:translate(-50%,-50%) translateX(0);}
 }
 
+/* HUD */
 #score{
-  position:absolute;top:10px;left:20px;
-  font-size:1.6rem;font-weight:700;color:#fff;z-index:5;
+  position:absolute;
+  top:10px;
+  left:20px;
+  font-size:1.6rem;
+  font-weight:700;
+  color:#fff;
+  z-index:5;
 }
 #bananaCount{
-  position:absolute;top:42px;left:20px;
-  font-size:1.3rem;color:#ffe066;z-index:5;
-  display:flex;align-items:center;gap:6px;
+  position:absolute;
+  top:42px;
+  left:20px;
+  font-size:1.3rem;
+  color:#ffe066;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
-#bananaCount img{width:26px;height:auto;}
+#bananaCount img{
+  width:26px;
+  height:auto;
+}
 
-#hearts{position:absolute;top:15px;right:20px;font-size:1.6rem;z-index:5;}
+#hearts{
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:1.6rem;
+  z-index:5;
+}
 
+/* PAUSE */
 #pauseBtn{
-  position:absolute;top:12px;left:50%;transform:translateX(-50%);
-  font-size:1.8rem;color:#fff;cursor:pointer;z-index:6;display:none;
+  position:absolute;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:1.8rem;
+  color:#fff;
+  cursor:pointer;
+  z-index:6;
+  display:none;
 }
 
+/* DEATH SCREEN */
 #deathScreen{
-  position:absolute;left:0;top:100vh;width:100%;height:100vh;
-  display:flex;align-items:flex-end;justify-content:center;background:#3aa0ff;
+  position:absolute;
+  left:0;
+  top:100vh;
+  width:100%;
+  height:100vh;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  background:#3aa0ff;
 }
 
 #deathGround{
-  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;height:min(45vh,420px);
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  height:min(45vh,420px);
   background-image:url('images/dead gor.png');
-  background-size:contain;background-position:bottom center;background-repeat:no-repeat;
+  background-size:contain;
+  background-position:bottom center;
+  background-repeat:no-repeat;
   z-index:2;
 }
 
 #deathText{
-  position:absolute;top:60px;left:50%;transform:translateX(-50%);
-  color:#fff;text-align:center;z-index:3;
+  position:absolute;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+  text-align:center;
+  z-index:3;
 }
-#deathText h1{font-size:2.2rem;margin-bottom:10px;}
-#deathText p{font-size:1.3rem;margin:4px 0;}
+#deathText h1{
+  font-size:2.2rem;
+  margin-bottom:10px;
+}
+#deathText p{
+  font-size:1.3rem;
+  margin:4px 0;
+}
 
 #restartBtn{
-  margin-top:16px;padding:8px 16px;background:rgba(0,0,0,0.7);
-  color:#fff;border:2px solid #fff;border-radius:4px;cursor:pointer;
+  margin-top:16px;
+  padding:8px 16px;
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  border:2px solid #fff;
+  border-radius:4px;
+  cursor:pointer;
 }
 
+/* SHOP BUTTON */
 #shopButton{
   position:absolute;
   bottom:18px;
@@ -140,8 +282,10 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
   height:70px;
   cursor:pointer;
   z-index:4;
+  pointer-events:auto;
 }
 
+/* SHOP OVERLAY */
 #shopOverlay{
   position:absolute;
   inset:0;
@@ -238,16 +382,21 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
 
       <div id="gameWorld">
         <div id="score">Score: 0</div>
+
         <div id="bananaCount">
-          <img src="images/bbb-removebg-preview.png" alt="">
+          <img src="images/bbb-removebg-preview.png">
           <span id="bananaText">Bananas: 0</span>
         </div>
-        <div id="hearts">3</div>
+
+        <div id="hearts">❤️❤️❤️</div>
+
         <div id="pauseBtn">
-          <i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>
+          <i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>
         </div>
+
         <img id="player" src="images/gor2-removebg-preview.png">
-        <img id="megaWaveBanner" src="images/meg-removebg-preview.png" alt="">
+
+        <img id="megaWaveBanner" src="images/meg-removebg-preview.png">
       </div>
 
       <div id="deathScreen">
@@ -258,28 +407,35 @@ img{user-select:none;-webkit-user-drag:none;pointer-events:none;}
           <p id="bananaLine">Bananas: 0</p>
           <button id="restartBtn">Go again</button>
         </div>
+
         <div id="deathGround"></div>
-        <img id="shopButton" src="images/shop-removebg-preview.png" alt="">
+
+        <img id="shopButton" src="images/shop-removebg-preview.png">
       </div>
 
     </div>
   </div>
 
+  <!-- SHOP -->
   <div id="shopOverlay">
     <div id="shopPanel">
       <div id="shopClose">X</div>
       <div id="shopTitle">Gorilla Skins</div>
-      <div id="shopPrev" class="shop-arrow"><span>&lt;</span></div>
-      <div id="shopNext" class="shop-arrow"><span>&gt;</span></div>
-      <img id="shopSkinImage" src="" alt="">
+
+      <div id="shopPrev" class="shop-arrow">&lt;</div>
+      <div id="shopNext" class="shop-arrow">&gt;</div>
+
+      <img id="shopSkinImage" src="">
       <div id="shopInfo"></div>
       <div id="shopLock"></div>
       <button id="shopActionBtn"></button>
     </div>
   </div>
+
 </div>
 
 <script>
+/********** ELEMENTS **********/
 const overlay=document.getElementById("overlay");
 const skipBtn=document.getElementById("skipBtn");
 const gameLayer=document.getElementById("gameLayer");
@@ -305,8 +461,10 @@ const shopPrev=document.getElementById("shopPrev");
 const shopNext=document.getElementById("shopNext");
 const shopClose=document.getElementById("shopClose");
 
+/********** DEVICE CHECK **********/
 const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+/********** PLAYER SIZE **********/
 if (!isPC) {
   player.style.width = "70px";
   player.style.left = "90px";
@@ -315,6 +473,7 @@ if (!isPC) {
   player.style.left = "150px";
 }
 
+/********** GAME VARS **********/
 let y=window.innerHeight/2;
 let velocity=0;
 
@@ -330,7 +489,6 @@ let bananaSpawnTimer=0;
 
 let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
 let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
-
 bananaText.textContent="Bananas: "+bananasTotal;
 
 let comboCount=0;
@@ -339,8 +497,8 @@ let frameCounter=0;
 
 let planePassCount=0;
 let inMegaWave=false;
-let megaWaveTimer=0;
 
+/********** SKINS **********/
 const SKINS=[
   {
     id:"vanilla",
@@ -366,7 +524,7 @@ const SKINS=[
 
 let ownedSkinsJSON=localStorage.getItem("vg_owned_skins");
 let ownedSkins=ownedSkinsJSON?JSON.parse(ownedSkinsJSON):["vanilla"];
-SKINS.forEach(s=>{if(ownedSkins.includes(s.id))s.unlocked=true;});
+SKINS.forEach(s=>{ if(ownedSkins.includes(s.id)) s.unlocked=true; });
 
 let currentSkinId=localStorage.getItem("vg_current_skin")||"vanilla";
 if(!ownedSkins.includes(currentSkinId)) currentSkinId="vanilla";
@@ -377,6 +535,7 @@ function getCurrentSkin(){
 
 let shopIndex=0;
 
+/********** APPLY SKIN **********/
 function applyCurrentSkin(falling=false,dead=false){
   const skin=getCurrentSkin();
   if(dead){
@@ -393,6 +552,7 @@ function applyCurrentSkin(falling=false,dead=false){
 
 applyCurrentSkin(false,false);
 
+/********** INPUT **********/
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
 });
@@ -400,13 +560,20 @@ document.addEventListener("mousedown",flap);
 document.addEventListener("touchstart",e=>{e.preventDefault();flap();});
 
 function flap(){
-  if(!running||paused)return;
+  if(!running){
+    startGameplay();
+  }
+  if(paused)return;
   started=true;
   velocity=flapStrength;
 }
 
-function updateHearts(){heartsEl.textContent=String(lives);}
+/********** HEARTS **********/
+function updateHearts(){
+  heartsEl.textContent="❤️".repeat(lives);
+}
 
+/********** BONUS TEXT **********/
 function flashBonus(text,color="yellow"){
   const b=document.createElement("div");
   b.textContent=text;
@@ -424,6 +591,7 @@ function flashBonus(text,color="yellow"){
   setTimeout(()=>b.remove(),1100);
 }
 
+/********** SPAWN PLANE **********/
 function spawnPlane(isMega=false){
   let maxPlanes=isMega?12:Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
@@ -438,6 +606,7 @@ function spawnPlane(isMega=false){
 
   plane.style.top=yPos+"px";
   plane.style.left=window.innerWidth+"px";
+  plane.style.width = isPC ? "120px" : "90px";
 
   let baseSpeed;
   if(isMega){
@@ -455,6 +624,7 @@ function spawnPlane(isMega=false){
   planes.push(plane);
 }
 
+/********** SPAWN BANANA **********/
 function spawnBanana(){
   const banana=document.createElement("img");
   banana.src="images/bbb-removebg-preview.png";
@@ -475,6 +645,7 @@ function spawnBanana(){
   bananas.push(banana);
 }
 
+/********** COLLISION **********/
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=26;
@@ -493,6 +664,7 @@ function hitBanana(a,b){
            ar.top+shrink>br.bottom-shrink);
 }
 
+/********** SCORE DISPLAY **********/
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
@@ -503,14 +675,16 @@ function updateScoreDisplay(){
   }
 }
 
+/********** MEGA WAVE **********/
 function startMegaWave(){
   inMegaWave=true;
-  megaWaveTimer=0;
   megaWaveBanner.style.display="block";
   megaWaveBanner.classList.add("mega-shake");
+
   for(let i=0;i<8;i++){
     setTimeout(()=>spawnPlane(true),i*120);
   }
+
   setTimeout(()=>{
     megaWaveBanner.style.display="none";
     megaWaveBanner.classList.remove("mega-shake");
@@ -518,6 +692,7 @@ function startMegaWave(){
   },2500);
 }
 
+/********** GAME LOOP **********/
 function gameLoop(){
   if(!running||paused)return;
 
@@ -692,6 +867,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
+/********** DEATH **********/
 function triggerDeath(){
   if(!running)return;
   running=false;
@@ -702,7 +878,7 @@ function triggerDeath(){
   setTimeout(()=>document.body.style.transform="translate(-10px)",80);
   setTimeout(()=>document.body.style.transform="translate(0)",160);
 
-  applyCurrentSkin(true,true);
+  applyCurrentSkin(true,false);
 
   let dv=0;
   function fall(){
@@ -734,6 +910,7 @@ function startScrollDown(){
   worldStack.style.transform="translateY(-100vh)";
 }
 
+/********** RESTART **********/
 restartBtn.onclick=()=>{
   worldStack.style.transition="transform 1s ease-out";
   worldStack.style.transform="translateY(0)";
@@ -758,7 +935,6 @@ restartBtn.onclick=()=>{
     frameCounter=0;
     planePassCount=0;
     inMegaWave=false;
-    megaWaveTimer=0;
 
     updateHearts();
 
@@ -786,6 +962,7 @@ restartBtn.onclick=()=>{
   },900);
 };
 
+/********** PAUSE **********/
 pauseBtn.onclick=()=>{
   if(!running)return;
   paused=!paused;
@@ -795,7 +972,15 @@ pauseBtn.onclick=()=>{
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
+/********** START GAME **********/
+let cutsceneTimeout=null;
+
 function startGameplay(){
+  if(cutsceneTimeout!==null){
+    clearTimeout(cutsceneTimeout);
+    cutsceneTimeout=null;
+  }
+
   overlay.style.opacity="0";
   overlay.style.pointerEvents="none";
   skipBtn.style.display="none";
@@ -819,105 +1004,7 @@ function startGameplay(){
   frameCounter=0;
   planePassCount=0;
   inMegaWave=false;
-  megaWaveTimer=0;
 
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
   bananas.forEach(b=>b.remove());bananas=[];
-  scoreEl.style.color="#fff";
-  scoreEl.textContent="Score: 0";
-
-  applyCurrentSkin(false,false);
-  player.style.display="block";
-  player.style.top=y+"px";
-  player.style.transform="translateY(-50%) rotate(0deg)";
-  if(!isPC){
-    player.style.width="70px";
-    player.style.left="90px";
-  }else{
-    player.style.width="100px";
-    player.style.left="150px";
-  }
-
-  pauseBtn.style.display="block";
-  pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
-
-  requestAnimationFrame(gameLoop);
-}
-
-function showCutscene(){
-  overlay.style.opacity="1";
-  overlay.style.pointerEvents="auto";
-  skipBtn.style.display="block";
-  setTimeout(startGameplay,4000);
-}
-
-skipBtn.onclick=()=>{startGameplay();};
-
-setTimeout(showCutscene,4500);
-
-/* SHOP LOGIC */
-
-function updateShopUI(){
-  const skin=SKINS[shopIndex];
-  shopSkinImage.src=skin.icon;
-  shopInfo.textContent=skin.name+" - "+skin.price+" bananas";
-  if(skin.unlocked){
-    shopLock.textContent="";
-    if(currentSkinId===skin.id){
-      shopActionBtn.textContent="Equipped";
-      shopActionBtn.disabled=true;
-    }else{
-      shopActionBtn.textContent="Equip";
-      shopActionBtn.disabled=false;
-    }
-  }else{
-    shopLock.textContent="Locked";
-    shopActionBtn.textContent="Buy";
-    shopActionBtn.disabled=false;
-  }
-}
-
-shopButton.onclick=()=>{
-  shopOverlay.style.display="flex";
-  updateShopUI();
-};
-
-shopClose.onclick=()=>{
-  shopOverlay.style.display="none";
-};
-
-shopPrev.onclick=()=>{
-  shopIndex=(shopIndex-1+SKINS.length)%SKINS.length;
-  updateShopUI();
-};
-
-shopNext.onclick=()=>{
-  shopIndex=(shopIndex+1)%SKINS.length;
-  updateShopUI();
-};
-
-shopActionBtn.onclick=()=>{
-  const skin=SKINS[shopIndex];
-  if(skin.unlocked){
-    currentSkinId=skin.id;
-    localStorage.setItem("vg_current_skin",currentSkinId);
-    applyCurrentSkin(false,false);
-    updateShopUI();
-  }else{
-    if(bananasTotal>=skin.price){
-      bananasTotal-=skin.price;
-      bananaText.textContent="Bananas: "+bananasTotal;
-      localStorage.setItem("vg_bananas",String(bananasTotal));
-      skin.unlocked=true;
-      if(!ownedSkins.includes(skin.id)){
-        ownedSkins.push(skin.id);
-        localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
-      }
-      updateShopUI();
-    }
-  }
-};
-</script>
-</body>
-</html>
