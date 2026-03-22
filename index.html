@@ -4,606 +4,451 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vanilla Gorilla</title>
-
 <link rel="icon" type="image/png" href="images/goggg-removebg-preview.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-user-select:none;
--webkit-user-select:none;
--webkit-tap-highlight-color:transparent;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
-
 body{
-background:#000;
-overflow:hidden;
-font-family:sans-serif;
+  background:#000;
+  overflow:hidden;
+  font-family:sans-serif;
 }
-
 img{
-user-select:none;
--webkit-user-drag:none;
-pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
 }
 
 #scene{
-position:relative;
-width:100vw;
-height:100vh;
-overflow:hidden;
-background:#3aa0ff;
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:#3aa0ff;
 }
 
-/* INTRO */
+/* INTRO ANIMATIONS */
 #gorillaIntro{
-position:absolute;
-width:240px;
-bottom:-220px;
-left:-220px;
-transform:rotate(25deg);
-opacity:0;
-animation:flyIntro 4s ease-out forwards;
-animation-delay:0.3s;
-z-index:6;
+  position:absolute;
+  width:240px;
+  bottom:-220px;
+  left:-220px;
+  transform:rotate(25deg);
+  opacity:0;
+  animation:flyIntro 4s ease-out forwards;
+  animation-delay:0.3s;
+  z-index:6;
 }
-
 @keyframes flyIntro{
-0%{bottom:-220px;left:-220px;opacity:1;}
-100%{bottom:100vh;left:100vw;opacity:0;}
+  0%{bottom:-220px;left:-220px;opacity:1;}
+  100%{bottom:100vh;left:100vw;opacity:0;}
 }
 
 #vanillaText{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
-font-size:3.2rem;
-color:#fff;
-opacity:0;
-animation:vanillaSpin 2.5s ease-out forwards;
-animation-delay:2s;
-z-index:6;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
+  font-size:3.2rem;
+  color:#fff;
+  opacity:0;
+  animation:vanillaSpin 2.5s ease-out forwards;
+  animation-delay:2s;
+  z-index:6;
 }
-
 @keyframes vanillaSpin{
-0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
-30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
-60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}
-100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
+  60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
 }
 
-/* OVERLAY */
+/* BLACK CUTSCENE OVERLAY (first time only) */
 #overlay{
-position:absolute;
-inset:0;
-background:#000;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-color:#fff;
-font-size:1.6rem;
-opacity:0;
-pointer-events:none;
-z-index:7;
-transition:opacity 0.6s;
+  position:absolute;
+  inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  font-size:1.6rem;
+  opacity:0;
+  pointer-events:none;
+  z-index:7;
+  transition:opacity 0.6s;
+}
+#overlayText{
+  padding:10px 20px;
 }
 
-/* GAME */
+/* GAME LAYER */
 #gameLayer{
-position:absolute;
-inset:0;
+  position:absolute;
+  inset:0;
+  background:#3aa0ff;
+  display:block;
+  overflow:hidden;
+  z-index:3;
 }
 
 #worldStack{
-position:absolute;
-width:100%;
-height:200vh;
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:200vh;
+  transition:transform 0s;
 }
 
 #gameWorld{
-position:absolute;
-width:100%;
-height:100vh;
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
 }
 
 /* PLAYER */
 #player{
-position:absolute;
-width:100px;
-left:150px;
-top:50%;
-transform:translateY(-50%);
-z-index:4;
-display:none;
+  position:absolute;
+  width:100px;
+  left:150px;
+  top:50%;
+  transform:translateY(-50%) rotate(0deg);
+  transition:transform 0.06s linear;
+  z-index:4;
+  display:none; /* HIDDEN UNTIL INTRO/CUTSCENE DONE OR AFTER FIRST TIME */
 }
 
 /* OBJECTS */
 .plane{
-position:absolute;
-width:120px;
-z-index:3;
+  position:absolute;
+  width:120px;
+  z-index:3;
+}
+.banana{
+  position:absolute;
+  width:55px;
+  z-index:3;
 }
 
-.banana{
-position:absolute;
-width:55px;
-z-index:3;
+/* MEGA WAVE */
+#megaWaveBanner{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:8;
+  display:none;
+}
+.mega-shake{
+  animation:megaShake 0.6s linear infinite;
+}
+@keyframes megaShake{
+  0%{transform:translate(-50%,-50%) translateX(-4px);}
+  25%{transform:translate(-50%,-50%) translateX(4px);}
+  50%{transform:translate(-50%,-50%) translateX(-4px);}
+  75%{transform:translate(-50%,-50%) translateX(4px);}
+  100%{transform:translate(-50%,-50%) translateX(0);}
 }
 
 /* HUD */
 #score{
-position:absolute;
-top:10px;
-left:20px;
-color:#fff;
-font-size:1.6rem;
-z-index:5;
+  position:absolute;
+  top:10px;
+  left:20px;
+  font-size:1.6rem;
+  font-weight:700;
+  color:#fff;
+  z-index:5;
 }
-
 #bananaCount{
-position:absolute;
-top:42px;
-left:20px;
-color:#ffe066;
-z-index:5;
-display:flex;
-align-items:center;
-gap:6px;
+  position:absolute;
+  top:42px;
+  left:20px;
+  font-size:1.3rem;
+  color:#ffe066;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
-
 #bananaCount img{
-width:26px;
+  width:26px;
+  height:auto;
 }
 
 #hearts{
-position:absolute;
-top:15px;
-right:20px;
-z-index:5;
-font-size:1.6rem;
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:1.6rem;
+  z-index:5;
 }
 
 /* PAUSE */
 #pauseBtn{
-position:absolute;
-top:12px;
-left:50%;
-transform:translateX(-50%);
-color:#fff;
-z-index:6;
-display:none;
+  position:absolute;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:1.8rem;
+  color:#fff;
+  cursor:pointer;
+  z-index:6;
+  display:none;
 }
 
-/* DEATH */
+/* DEATH SCREEN */
 #deathScreen{
-position:absolute;
-top:100vh;
-width:100%;
-height:100vh;
-display:flex;
-align-items:flex-end;
-justify-content:center;
+  position:absolute;
+  left:0;
+  top:100vh;
+  width:100%;
+  height:100vh;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  background:#3aa0ff;
+}
+
+#deathGround{
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  height:min(45vh,420px);
+  background-image:url('images/dead gor.png');
+  background-size:contain;
+  background-position:bottom center;
+  background-repeat:no-repeat;
+  z-index:2;
 }
 
 #deathText{
-position:absolute;
-top:60px;
-left:50%;
-transform:translateX(-50%);
-color:#fff;
-text-align:center;
+  position:absolute;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+  text-align:center;
+  z-index:3;
+}
+#deathText h1{
+  font-size:2.2rem;
+  margin-bottom:10px;
+}
+#deathText p{
+  font-size:1.3rem;
+  margin:4px 0;
 }
 
 #restartBtn{
-margin-top:16px;
-padding:8px 16px;
-background:#000;
-color:#fff;
-border:2px solid #fff;
-cursor:pointer;
+  margin-top:16px;
+  padding:8px 16px;
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  border:2px solid #fff;
+  border-radius:4px;
+  cursor:pointer;
 }
 
-/* SHOP */
+/* SHOP BUTTON */
 #shopButton{
-position:absolute;
-bottom:18px;
-right:18px;
-width:70px;
-height:70px;
-cursor:pointer;
+  position:absolute;
+  bottom:18px;
+  right:18px;
+  width:70px;
+  height:70px;
+  cursor:pointer;
+  z-index:4;
+  pointer-events:auto;
 }
 
+/* SHOP OVERLAY */
 #shopOverlay{
-position:absolute;
-inset:0;
-background:rgba(0,0,0,0.8);
-display:none;
-align-items:center;
-justify-content:center;
-z-index:9;
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9;
 }
 
 #shopPanel{
-background:#111;
-border:2px solid #444;
-padding:16px;
-color:#fff;
-text-align:center;
-position:relative;
+  background:#111;
+  border:2px solid #444;
+  border-radius:10px;
+  padding:16px 20px;
+  width:min(90vw,420px);
+  color:#fff;
+  text-align:center;
+  position:relative;
+}
+
+#shopTitle{
+  font-size:1.6rem;
+  margin-bottom:10px;
+}
+
+#shopSkinImage{
+  width:180px;
+  height:auto;
+  display:block;
+  margin:0 auto 10px auto;
+}
+
+#shopInfo{
+  margin-bottom:10px;
+  font-size:1.1rem;
 }
 
 .shop-arrow{
-position:absolute;
-top:50%;
-transform:translateY(-50%);
-cursor:pointer;
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:32px;
+  height:32px;
+  border-radius:4px;
+  border:2px solid #fff;
+  background:#000;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:1.2rem;
 }
-
 #shopPrev{left:10px;}
 #shopNext{right:10px;}
+
+#shopActionBtn{
+  margin-top:6px;
+  padding:6px 14px;
+  border-radius:4px;
+  border:2px solid #fff;
+  background:#222;
+  color:#fff;
+  cursor:pointer;
+}
+
+#shopLock{
+  margin-top:4px;
+  font-size:1.1rem;
+}
+
+#shopClose{
+  position:absolute;
+  top:6px;
+  right:8px;
+  cursor:pointer;
+  font-size:1.1rem;
+  color:#aaa;
+}
 </style>
 </head>
-
 <body>
 
 <div id="scene">
+  <!-- INTRO -->
+  <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
+  <div id="vanillaText">VANILLA GORILLA</div>
 
-<img id="gorillaIntro" src="images/gor1-removebg-preview.png">
-<div id="vanillaText">VANILLA GORILLA</div>
+  <!-- BLACK CUTSCENE (first time only) -->
+  <div id="overlay">
+    <div id="overlayText">Survive the skies.</div>
+  </div>
 
-<div id="overlay">
-<div id="overlayText">Survive the skies.</div>
+  <div id="gameLayer">
+    <div id="worldStack">
+
+      <div id="gameWorld">
+        <div id="score">Score: 0</div>
+
+        <div id="bananaCount">
+          <img src="images/bbb-removebg-preview.png">
+          <span id="bananaText">Bananas: 0</span>
+        </div>
+
+        <div id="hearts">❤️❤️❤️</div>
+
+        <div id="pauseBtn" class="ui">
+          <i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>
+        </div>
+
+        <img id="player" src="images/gor2-removebg-preview.png">
+
+        <img id="megaWaveBanner" src="images/meg-removebg-preview.png">
+      </div>
+
+      <div id="deathScreen">
+        <div id="deathText">
+          <h1>YOU DIED</h1>
+          <p id="scoreLine">Score: 0</p>
+          <p id="bestScoreLine">Best Score: 0</p>
+          <p id="bananaLine">Bananas: 0</p>
+          <button id="restartBtn" class="ui">Go again</button>
+        </div>
+
+        <div id="deathGround"></div>
+
+        <img id="shopButton" class="ui" src="images/shop-removebg-preview.png">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="shopOverlay">
+    <div id="shopPanel">
+      <div id="shopClose" class="ui">X</div>
+      <div id="shopTitle">Gorilla Skins</div>
+
+      <div id="shopPrev" class="shop-arrow ui">&lt;</div>
+      <div id="shopNext" class="shop-arrow ui">&gt;</div>
+
+      <img id="shopSkinImage" src="">
+      <div id="shopInfo"></div>
+      <div id="shopLock"></div>
+      <button id="shopActionBtn" class="ui"></button>
+    </div>
+  </div>
+
 </div>
 
-<div id="gameLayer">
-<div id="worldStack">
-
-<div id="gameWorld">
-
-<div id="score">Score: 0</div>
-
-<div id="bananaCount">
-<img src="images/bbb-removebg-preview.png">
-<span id="bananaText">Bananas: 0</span>
-</div>
-
-<div id="hearts">❤️❤️❤️</div>
-
-<div id="pauseBtn">
-<i class="fa-solid fa-pause"></i>
-</div>
-
-<img id="player" src="images/gor2-removebg-preview.png">
-
-</div>
-
-<div id="deathScreen">
-<div id="deathText">
-<h1>YOU DIED</h1>
-<p id="scoreLine">Score: 0</p>
-<p id="bestScoreLine">Best Score: 0</p>
-<p id="bananaLine">Bananas: 0</p>
-<button id="restartBtn">Go again</button>
-</div>
-
-<img id="shopButton" src="images/shop-removebg-preview.png">
-</div>
-
-</div>
-</div>
-
-<div id="shopOverlay">
-<div id="shopPanel">
-
-<div id="shopClose">X</div>
-
-<div id="shopPrev" class="shop-arrow">&lt;</div>
-<div id="shopNext" class="shop-arrow">&gt;</div>
-
-<img id="shopSkinImage" src="">
-<div id="shopInfo"></div>
-<div id="shopLock"></div>
-<button id="shopActionBtn"></button>
-
-</div>
-</div>
-
-</div>
 <script>
-
-/* =========================
-   ELEMENTS
-========================= */
 const overlay=document.getElementById("overlay");
 const overlayText=document.getElementById("overlayText");
+const gorillaIntro=document.getElementById("gorillaIntro");
+const vanillaText=document.getElementById("vanillaText");
+
+const gameLayer=document.getElementById("gameLayer");
+const worldStack=document.getElementById("worldStack");
+const gameWorld=document.getElementById("gameWorld");
 const player=document.getElementById("player");
 const scoreEl=document.getElementById("score");
 const heartsEl=document.getElementById("hearts");
-const bananaText=document.getElementById("bananaText");
 const restartBtn=document.getElementById("restartBtn");
 const pauseBtn=document.getElementById("pauseBtn");
-
-/* =========================
-   DEVICE DETECTION
-========================= */
-const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-/* =========================
-   PHYSICS (PC BUFFED)
-========================= */
-let baseFlapStrengthPC=-8.6;
-let baseGravityPC=0.18;
-
-let baseFlapStrengthMobile=-6.6;
-let baseGravityMobile=0.25;
-
-let flapStrength=isPC?baseFlapStrengthPC:baseFlapStrengthMobile;
-let gravity=isPC?baseGravityPC:baseGravityMobile;
-
-/* =========================
-   GAME STATE
-========================= */
-let y=window.innerHeight/2;
-let velocity=0;
-
-let running=false;
-let started=false;
-let paused=false;
-let allowInput=false;
-
-let planes=[];
-let bananas=[];
-
-let score=0;
-let scoreTimer=0;
-let safeFrames=0;
-
-let lives=3;
-
-/* =========================
-   WALLS EVENT
-========================= */
-let inWalls=false;
-
-function startWalls(){
-  if(inWalls) return;
-
-  inWalls=true;
-  flashText("WALLS");
-
-  for(let i=0;i<5;i++){
-    setTimeout(()=>spawnWall(), i*600);
-  }
-
-  setTimeout(()=>{
-    inWalls=false;
-  },4000);
-}
-
-function spawnWall(){
-  const gapSize=180;
-  const gapY=Math.random()*(window.innerHeight-gapSize-100)+50;
-
-  for(let yPos=0;yPos<window.innerHeight;yPos+=90){
-
-    if(yPos>gapY && yPos<gapY+gapSize) continue;
-
-    const plane=document.createElement("img");
-    plane.src="images/plane-removebg-preview.png";
-    plane.className="plane";
-
-    plane.style.left=window.innerWidth+"px";
-    plane.style.top=yPos+"px";
-    plane.style.width = isPC ? "120px":"90px";
-
-    let speed = isPC ? 6 : 4;
-    plane.dataset.speed=speed;
-
-    document.getElementById("gameWorld").appendChild(plane);
-    planes.push(plane);
-  }
-}
-
-/* =========================
-   SPAWN NORMAL PLANES (PC HARDER)
-========================= */
-function spawnPlane(){
-
-  let maxPlanes;
-
-  if(isPC){
-    maxPlanes=Math.min(12,4+Math.floor(safeFrames/250));
-  }else{
-    maxPlanes=Math.min(7,2+Math.floor(safeFrames/350));
-  }
-
-  if(planes.length>=maxPlanes)return;
-
-  const plane=document.createElement("img");
-  plane.src="images/plane-removebg-preview.png";
-  plane.className="plane";
-
-  plane.style.top=Math.random()*(window.innerHeight-220)+"px";
-  plane.style.left=window.innerWidth+"px";
-
-  let speed=2.5+Math.random()*2;
-
-  if(!isPC){
-    speed*=0.7;
-  }else{
-    speed*=1.45;
-  }
-
-  plane.dataset.speed=speed;
-
-  document.getElementById("gameWorld").appendChild(plane);
-  planes.push(plane);
-}
-
-/* =========================
-   COLLISION
-========================= */
-function hit(a,b){
-  const ar=a.getBoundingClientRect();
-  const br=b.getBoundingClientRect();
-
-  return !(ar.right<br.left || ar.left>br.right || ar.bottom<br.top || ar.top>br.bottom);
-}
-
-/* =========================
-   INPUT
-========================= */
-document.addEventListener("keydown",e=>{
-  if(e.code==="Space"){
-    flap();
-  }
-});
-
-document.addEventListener("mousedown",flap);
-
-function flap(){
-  if(!allowInput) return;
-
-  if(!running){
-    startGame();
-    return;
-  }
-
-  velocity=flapStrength;
-}
-
-/* =========================
-   TEXT EFFECT
-========================= */
-function flashText(txt){
-  const t=document.createElement("div");
-  t.textContent=txt;
-
-  t.style.position="absolute";
-  t.style.top="50%";
-  t.style.left="50%";
-  t.style.transform="translate(-50%,-50%)";
-  t.style.fontSize="40px";
-  t.style.color="cyan";
-  t.style.zIndex="10";
-
-  document.body.appendChild(t);
-
-  setTimeout(()=>t.remove(),1500);
-}
-
-/* =========================
-   GAME LOOP
-========================= */
-function gameLoop(){
-
-  if(!running || paused) return;
-
-  safeFrames++;
-
-  velocity+=gravity;
-  y+=velocity;
-
-  player.style.top=y+"px";
-
-  if(y<0) y=0;
-  if(y>window.innerHeight-80){
-    triggerDeath();
-    return;
-  }
-
-  /* SPAWNING */
-  if(started && safeFrames>100 && !inWalls){
-    if(Math.random()<0.03){
-      spawnPlane();
-    }
-  }
-
-  /* MOVE PLANES */
-  for(let i=planes.length-1;i>=0;i--){
-    let p=planes[i];
-
-    let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
-    p.style.left=left+"px";
-
-    if(left<-200){
-      p.remove();
-      planes.splice(i,1);
-      continue;
-    }
-
-    if(hit(player,p)){
-      lives--;
-      p.remove();
-      planes.splice(i,1);
-
-      if(lives<=0){
-        triggerDeath();
-        return;
-      }
-    }
-  }
-
-  /* SCORE */
-  scoreTimer++;
-  if(scoreTimer>12){
-    score++;
-    scoreTimer=0;
-    scoreEl.textContent="Score: "+score;
-  }
-
-  /* WALLS TRIGGER */
-  if(!inWalls && score>150 && score%180===0){
-    if(Math.random()<0.6){
-      startWalls();
-    }
-  }
-
-  requestAnimationFrame(gameLoop);
-}
-
-/* =========================
-   START GAME
-========================= */
-function startGame(){
-  running=true;
-  started=true;
-  lives=3;
-  score=0;
-  safeFrames=0;
-
-  player.style.display="block";
-  pauseBtn.style.display="block";
-
-  requestAnimationFrame(gameLoop);
-}
-
-/* =========================
-   DEATH
-========================= */
-function triggerDeath(){
-  running=false;
-  alert("you died");
-  location.reload();
-}
-/* =========================
-   SHOP SYSTEM
-========================= */
-const SKINS=[
-  {id:"vanilla",name:"Vanilla Gorilla",price:0,unlocked:true,icon:"images/goggg-removebg-preview.png",fly:"images/gor2-removebg-preview.png",fall:"images/gor3-removebg-preview.png",dead:"images/dead gor.png"},
-  {id:"spider",name:"Spider Gorilla",price:100,unlocked:false,icon:"images/spider-removebg-preview.png",fly:"images/flyspider-removebg-preview.png",fall:"images/flyspider-removebg-preview.png",dead:"images/spider-removebg-preview.png"}
-];
-
-let ownedSkins=JSON.parse(localStorage.getItem("vg_owned_skins")||'["vanilla"]');
-SKINS.forEach(s=>{ if(ownedSkins.includes(s.id)) s.unlocked=true; });
-let currentSkinId=localStorage.getItem("vg_current_skin")||"vanilla";
-if(!ownedSkins.includes(currentSkinId)) currentSkinId="vanilla";
-
+const scoreLine=document.getElementById("scoreLine");
+const bestScoreLine=document.getElementById("bestScoreLine");
+const bananaText=document.getElementById("bananaText");
+const bananaLine=document.getElementById("bananaLine");
+const megaWaveBanner=document.getElementById("megaWaveBanner");
+const shopButton=document.getElementById("shopButton");
 const shopOverlay=document.getElementById("shopOverlay");
 const shopSkinImage=document.getElementById("shopSkinImage");
 const shopInfo=document.getElementById("shopInfo");
@@ -612,18 +457,652 @@ const shopActionBtn=document.getElementById("shopActionBtn");
 const shopPrev=document.getElementById("shopPrev");
 const shopNext=document.getElementById("shopNext");
 const shopClose=document.getElementById("shopClose");
+
+const isPC=!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (!isPC) {
+  player.style.width = "70px";
+  player.style.left = "90px";
+} else {
+  player.style.width = "100px";
+  player.style.left = "150px";
+}
+
+let y=window.innerHeight/2;
+let velocity=0;
+
+let baseFlapStrengthPC=-8.0;
+let baseFlapStrengthMobile=-6.6;
+let baseGravityPC=0.205;
+let baseGravityMobile=0.25;
+
+let flapStrength = isPC ? baseFlapStrengthPC : baseFlapStrengthMobile;
+let gravity = isPC ? baseGravityPC : baseGravityMobile;
+
+let started=false,running=false,paused=false;
+let inDeathFall=false;
+let allowInput=false; // NO INPUT UNTIL INTRO/CUTSCENE DONE OR AFTER RESTART
+
+let planes=[];
+let bananas=[];
+let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
+let middleTimer=0,diveFrames=0;
+let bananaSpawnTimer=0;
+
+let bestScore=parseInt(localStorage.getItem("vg_best_score")||"0",10);
+let bananasTotal=parseInt(localStorage.getItem("vg_bananas")||"0",10);
+bananaText.textContent="Bananas: "+bananasTotal;
+
+let comboCount=0;
+let lastGapFrame=0;
+let frameCounter=0;
+
+let planePassCount=0;
+let inMegaWave=false;
+let megaWaveActive=false;
+let firstMegaDone=false;
+let lastMegaScoreTrigger=0;
+
+const SKINS=[
+  {
+    id:"vanilla",
+    name:"Vanilla Gorilla",
+    price:0,
+    unlocked:true,
+    icon:"images/goggg-removebg-preview.png",
+    fly:"images/gor2-removebg-preview.png",
+    fall:"images/gor3-removebg-preview.png",
+    dead:"images/dead gor.png"
+  },
+  {
+    id:"spider",
+    name:"Spider Gorilla",
+    price:100,
+    unlocked:false,
+    icon:"images/spider-removebg-preview.png",
+    fly:"images/flyspider-removebg-preview.png",
+    fall:"images/flyspider-removebg-preview.png",
+    dead:"images/spider-removebg-preview.png"
+  }
+];
+
+let ownedSkinsJSON=localStorage.getItem("vg_owned_skins");
+let ownedSkins=ownedSkinsJSON?JSON.parse(ownedSkinsJSON):["vanilla"];
+SKINS.forEach(s=>{ if(ownedSkins.includes(s.id)) s.unlocked=true; });
+
+let currentSkinId=localStorage.getItem("vg_current_skin")||"vanilla";
+if(!ownedSkins.includes(currentSkinId)) currentSkinId="vanilla";
+
+function getCurrentSkin(){
+  return SKINS.find(s=>s.id===currentSkinId) || SKINS[0];
+}
+
 let shopIndex=0;
 
-/* APPLY SKIN */
 function applyCurrentSkin(falling=false,dead=false){
-  const skin=SKINS.find(s=>s.id===currentSkinId);
-  if(dead){player.src=skin.dead;}
-  else if(falling){player.src=skin.fall;}
-  else{player.src=skin.fly;}
+  const skin=getCurrentSkin();
+  if(dead){
+    player.src=skin.dead;
+  }else if(falling){
+    player.src=skin.fall;
+    if(skin.id==="spider"){
+      player.style.transformOrigin="center center";
+    }
+  }else{
+    player.src=skin.fly;
+  }
 }
+
 applyCurrentSkin(false,false);
 
-/* SHOP UI */
+document.addEventListener("keydown",e=>{
+  if(["Space","ArrowUp","KeyW"].includes(e.code)) flap(e);
+});
+document.addEventListener("mousedown",e=>flap(e));
+document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
+
+function flap(e){
+  if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
+  if(inDeathFall) return;
+  if(!allowInput) return; // BLOCK DURING INTRO, CUTSCENE, FALL, SCROLL, BEFORE RESTART
+
+  if(!running){
+    startGameplay();
+    return;
+  }
+  if(paused)return;
+
+  started=true;
+  velocity=flapStrength;
+}
+
+function updateHearts(){
+  heartsEl.textContent="❤️".repeat(lives);
+}
+
+function flashBonus(text,color="yellow"){
+  const b=document.createElement("div");
+  b.textContent=text;
+  b.style.position="absolute";
+  b.style.left="180px";
+  b.style.top=(y-40)+"px";
+  b.style.color=color;
+  b.style.fontSize="1.4rem";
+  b.style.fontWeight="700";
+  b.style.zIndex="10";
+  b.style.opacity="1";
+  b.style.transition="1s";
+  gameWorld.appendChild(b);
+  setTimeout(()=>{b.style.opacity="0";b.style.top=(y-80)+"px";},50);
+  setTimeout(()=>b.remove(),1100);
+}
+
+function screenShake(){
+  document.body.style.transition="0s";
+  document.body.style.transform="translate(8px)";
+  setTimeout(()=>document.body.style.transform="translate(-8px)",60);
+  setTimeout(()=>document.body.style.transform="translate(0)",120);
+}
+
+function spawnPlane(isMega=false){
+  let maxPlanes=isMega?14:Math.min(7,2+Math.floor(safeFrames/350));
+  if(planes.length>=maxPlanes)return;
+
+  const plane=document.createElement("img");
+  plane.src="images/plane-removebg-preview.png";
+  plane.className="plane";
+
+  const minY=0;
+  const maxY=window.innerHeight-220;
+  let yPos=Math.random()*(maxY-minY)+minY;
+
+  plane.style.top=yPos+"px";
+  plane.style.left=window.innerWidth+"px";
+  plane.style.width = isPC ? "120px" : "90px";
+
+  let baseSpeed;
+  if(isMega){
+    baseSpeed=3+Math.random()*5;
+  }else{
+    baseSpeed=2.4+Math.random()*2.6+Math.min(3.0,safeFrames/300);
+  }
+
+  if(!isPC) baseSpeed*=0.7;
+  else baseSpeed*=1.18;
+
+  plane.dataset.speed=baseSpeed;
+
+  gameWorld.appendChild(plane);
+  planes.push(plane);
+}
+
+function spawnBanana(){
+  const banana=document.createElement("img");
+  banana.src="images/bbb-removebg-preview.png";
+  banana.className="banana";
+
+  const minY=60;
+  const maxY=window.innerHeight-240;
+  let yPos=Math.random()*(maxY-minY)+minY;
+
+  banana.style.top=yPos+"px";
+  banana.style.left=window.innerWidth+"px";
+
+  let speed=2.6+Math.random()*1.2+Math.min(2.0,safeFrames/350);
+  if(!isPC) speed*=0.8;
+  banana.dataset.speed=speed;
+
+  gameWorld.appendChild(banana);
+  bananas.push(banana);
+}
+
+function hit(a,b){
+  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+  const shrink=26;
+  return !(ar.right-shrink<br.left+shrink||
+           ar.left+shrink>br.right-shrink||
+           ar.bottom-shrink<br.top+shrink||
+           ar.top+shrink>br.bottom-shrink);
+}
+
+function hitBanana(a,b){
+  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+  const shrink=10;
+  return !(ar.right-shrink<br.left+shrink||
+           ar.left+shrink>br.right-shrink||
+           ar.bottom-shrink<br.top+shrink||
+           ar.top+shrink>br.bottom-shrink);
+}
+
+function updateScoreDisplay(){
+  if(score>bestScore){
+    scoreEl.style.color="yellow";
+    scoreEl.innerHTML='<i class="fa-solid fa-crown" style="color:rgb(255,212,59);margin-right:6px;"></i> Score: '+score;
+  }else{
+    scoreEl.style.color="#fff";
+    scoreEl.textContent="Score: "+score;
+  }
+}
+
+function startMegaWave(){
+  if(megaWaveActive) return;
+  megaWaveActive=true;
+  inMegaWave=true;
+
+  megaWaveBanner.style.display="block";
+  megaWaveBanner.classList.add("mega-shake");
+
+  let originalFlap=flapStrength;
+  let originalGrav=gravity;
+
+  flapStrength = originalFlap * 1.2;
+  gravity = originalGrav * 1.2;
+
+  for(let i=0;i<12;i++){
+    setTimeout(()=>spawnPlane(true),i*120);
+  }
+
+  setTimeout(()=>{
+    megaWaveBanner.style.display="none";
+    megaWaveBanner.classList.remove("mega-shake");
+    flapStrength = originalFlap;
+    gravity = originalGrav;
+    inMegaWave=false;
+    megaWaveActive=false;
+  },3000);
+}
+
+function gameLoop(){
+  if(!running||paused)return;
+
+  frameCounter++;
+  safeFrames++;
+
+  velocity+=gravity;
+  y+=velocity;
+
+  let gorillaHeight = player.offsetHeight || 70;
+  if(y<0){
+    y=0;
+    velocity=0;
+  }
+  if(y>window.innerHeight-gorillaHeight+10){
+    y=window.innerHeight-gorillaHeight+10;
+    triggerDeath();
+    return;
+  }
+
+  player.style.top=y+"px";
+
+  let tiltVel=velocity*0.65;
+  let angle=tiltVel*3.1;
+  angle=Math.max(-32,Math.min(32,angle));
+  player.style.transform='translateY(-50%) rotate('+angle+'deg)';
+
+  if(velocity>4){
+    diveFrames++;
+    if(diveFrames>12){
+      applyCurrentSkin(true,false);
+    }
+  }else{
+    diveFrames=0;
+    applyCurrentSkin(false,false);
+  }
+
+  if(started){
+    const midTop=window.innerHeight*0.40;
+    const midBottom=window.innerHeight*0.60;
+
+    if(y>midTop && y<midBottom){
+      middleTimer++;
+      if(middleTimer>=60){
+        score+=2;
+        flashBonus("CENTER +2");
+        middleTimer=0;
+        updateScoreDisplay();
+      }
+    }else{
+      middleTimer=0;
+    }
+  }
+
+  if(started && safeFrames>120 && !inMegaWave){
+    planeSpawnTimer++;
+    if(planeSpawnTimer>Math.max(50,140-safeFrames/10)){
+      planeSpawnTimer=0;
+      spawnPlane(false);
+    }
+  }
+
+  if(started && safeFrames>200){
+    bananaSpawnTimer++;
+    if(bananaSpawnTimer>120){
+      bananaSpawnTimer=0;
+      if(Math.random()<0.7) spawnBanana();
+    }
+  }
+
+  if(frameCounter-lastGapFrame>180){
+    comboCount=0;
+  }
+
+  for(let i=planes.length-1;i>=0;i--){
+    const p=planes[i];
+    let left=parseFloat(p.style.left)-parseFloat(p.dataset.speed);
+    p.style.left=left+"px";
+
+    if(left<150 && left>20 && !p.bonusGiven){
+      p.bonusGiven=true;
+
+      const gorCenter=y;
+      const planeCenter=parseFloat(p.style.top)+60;
+      const gap=Math.abs(gorCenter-planeCenter);
+
+      let gotGood=false;
+
+      if(gap<40){
+        score+=10;
+        flashBonus("NARROW FIT +10","orange");
+        gotGood=true;
+      }else if(gap<100){
+        score+=5;
+        flashBonus("GOOD GAP +5","yellow");
+        gotGood=true;
+      }else if(gap<160){
+        score+=2;
+        flashBonus("NEAR MISS +2","#9cf");
+        gotGood=true;
+      }
+
+      if(gotGood){
+        comboCount++;
+        lastGapFrame=frameCounter;
+
+        if(comboCount===3){
+          score+=5;
+          flashBonus("COMBO x3 +5","lime");
+        }else if(comboCount===5){
+          score+=10;
+          flashBonus("COMBO x5 +10","lime");
+        }
+        updateScoreDisplay();
+      }else{
+        comboCount=0;
+      }
+
+      planePassCount++;
+    }
+
+    if(left<-250){
+      p.remove();
+      planes.splice(i,1);
+      continue;
+    }
+
+    if(hit(player,p)){
+      screenShake();
+      lives--;
+      updateHearts();
+      p.remove();
+      planes.splice(i,1);
+      comboCount=0;
+      if(lives<=0){triggerDeath();return;}
+    }
+  }
+
+  for(let i=bananas.length-1;i>=0;i--){
+    const b=bananas[i];
+    let left=parseFloat(b.style.left)-parseFloat(b.dataset.speed);
+    b.style.left=left+"px";
+
+    if(left<-200){
+      b.remove();
+      bananas.splice(i,1);
+      continue;
+    }
+
+    if(hitBanana(player,b)){
+      bananasTotal++;
+      localStorage.setItem("vg_bananas",String(bananasTotal));
+      bananaText.textContent="Bananas: "+bananasTotal;
+      flashBonus("+1 banana","gold");
+      b.remove();
+      bananas.splice(i,1);
+    }
+  }
+
+  if(started){
+    scoreTimer++;
+    if(scoreTimer>=14){
+      scoreTimer=0;
+      score++;
+      updateScoreDisplay();
+
+      // mega wave: first at 220, then 50% every +200
+      if(!firstMegaDone && score>=220){
+        firstMegaDone=true;
+        lastMegaScoreTrigger=220;
+        startMegaWave();
+      }else if(firstMegaDone && score>=220 && (score-220)%200===0 && score!==lastMegaScoreTrigger){
+        if(Math.random()<0.5){
+          lastMegaScoreTrigger=score;
+          startMegaWave();
+        }
+      }
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function triggerDeath(){
+  if(!running)return;
+  running=false;
+  paused=false;
+  started=false;
+  inDeathFall=true;
+  allowInput=false; // NO INPUT DURING FALL OR SCROLL
+
+  screenShake();
+
+  applyCurrentSkin(true,false);
+
+  let dv=0;
+  function fall(){
+    dv+=0.9;y+=dv;
+    player.style.top=y+"px";
+    player.style.transform='translateY(-50%) rotate(15deg)';
+    if(y<window.innerHeight+160)requestAnimationFrame(fall);
+    else showDeathScreen();
+  }
+  fall();
+}
+
+function showDeathScreen(){
+  inDeathFall=false;
+  allowInput=false; // STILL BLOCKED UNTIL RESTART BUTTON
+
+  if(score>bestScore){
+    bestScore=score;
+    localStorage.setItem("vg_best_score",String(bestScore));
+  }
+
+  const msgs=["You died L bozo","How r u so bad","My grandma can play better than u"];
+  document.querySelector("#deathText h1").textContent=msgs[Math.floor(Math.random()*msgs.length)];
+
+  scoreLine.textContent="Score: "+score;
+  bestScoreLine.textContent="Best Score: "+bestScore;
+  bananaLine.textContent="Bananas: "+bananasTotal;
+
+  player.style.display="none";
+
+  worldStack.style.transition="transform 2s ease-in";
+  worldStack.style.transform="translateY(-100vh)";
+}
+
+restartBtn.onclick=()=>{
+  allowInput=false; // STILL BLOCKED DURING SCROLL BACK UP
+
+  worldStack.style.transition="transform 1s ease-out";
+  worldStack.style.transform="translateY(0)";
+
+  setTimeout(()=>{
+    planes.forEach(p=>p.remove());planes=[];
+    bananas.forEach(b=>b.remove());bananas=[];
+    y=window.innerHeight/2;
+    velocity=0;
+    started=false;
+    running=false;
+    paused=false;
+    inDeathFall=false;
+    score=0;
+    scoreTimer=0;
+    safeFrames=0;
+    lives=3;
+    middleTimer=0;
+    diveFrames=0;
+    bananaSpawnTimer=0;
+    comboCount=0;
+    lastGapFrame=0;
+    frameCounter=0;
+    planePassCount=0;
+    inMegaWave=false;
+    megaWaveActive=false;
+    firstMegaDone=false;
+    lastMegaScoreTrigger=0;
+
+    updateHearts();
+
+    applyCurrentSkin(false,false);
+    player.style.display="block";
+    player.style.top=y+"px";
+    player.style.transform="translateY(-50%) rotate(0deg)";
+    if(!isPC){
+      player.style.width="70px";
+      player.style.left="90px";
+    }else{
+      player.style.width="100px";
+      player.style.left="150px";
+    }
+
+    scoreEl.style.color="#fff";
+    scoreEl.textContent="Score: 0";
+
+    pauseBtn.style.display="none";
+
+    overlay.style.opacity=0;
+    overlay.style.pointerEvents="none";
+
+    // NOW WE'RE IDLE ON BLUE, GORILLA VISIBLE, WAITING FOR FIRST CLICK
+    allowInput=true;
+  },900);
+};
+
+pauseBtn.onclick=()=>{
+  if(!running)return;
+  paused=!paused;
+  pauseBtn.innerHTML=paused
+    ? '<i class="fa-solid fa-play" style="color: rgb(30, 48, 80);"></i>'
+    : '<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+  if(!paused) requestAnimationFrame(gameLoop);
+};
+
+function startGameplay(){
+  overlay.style.opacity="0";
+  overlay.style.pointerEvents="none";
+
+  started=false;
+  running=true;
+  paused=false;
+  inDeathFall=false;
+
+  y=window.innerHeight/2;
+  velocity=0;
+  score=0;
+  scoreTimer=0;
+  safeFrames=0;
+  lives=3;
+  middleTimer=0;
+  diveFrames=0;
+  bananaSpawnTimer=0;
+  comboCount=0;
+  lastGapFrame=0;
+  frameCounter=0;
+  planePassCount=0;
+  inMegaWave=false;
+  megaWaveActive=false;
+  firstMegaDone=false;
+  lastMegaScoreTrigger=0;
+
+  updateHearts();
+  planes.forEach(p=>p.remove());planes=[];
+  bananas.forEach(b=>b.remove());bananas=[];
+  scoreEl.style.color="#fff";
+  scoreEl.textContent="Score: 0";
+
+  applyCurrentSkin(false,false);
+  player.style.display="block";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  if(!isPC){
+    player.style.width="70px";
+    player.style.left="90px";
+  }else{
+    player.style.width="100px";
+    player.style.left="150px";
+  }
+
+  pauseBtn.style.display="block";
+  pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+
+  requestAnimationFrame(gameLoop);
+}
+
+/* INTRO / CUTSCENE FLOW (FIRST TIME ONLY) */
+function runFirstTimeIntro(){
+  allowInput=false;          // NO INPUT DURING INTRO
+  player.style.display="none"; // HIDE PLAYER DURING INTRO
+
+  // after intro animations, show black cutscene
+  setTimeout(()=>{
+    overlayText.textContent="Survive the skies.";
+    overlay.style.opacity=1;
+    overlay.style.pointerEvents="none";
+  },7000); // intro length
+
+  // after cutscene, fade out, show player, allow first click
+  setTimeout(()=>{
+    overlay.style.opacity=0;
+    overlay.style.pointerEvents="none";
+    player.style.display="block";
+    player.style.top=y+"px";
+    player.style.transform="translateY(-50%) rotate(0deg)";
+    allowInput=true; // NOW FIRST CLICK CAN START GAME
+    localStorage.setItem("vg_seen_intro","1");
+  },7000+2500);
+}
+
+function skipIntroShowIdle(){
+  gorillaIntro.style.display="none";
+  vanillaText.style.display="none";
+  overlay.style.opacity=0;
+  overlay.style.pointerEvents="none";
+  player.style.display="block";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  allowInput=true; // CAN START GAME IMMEDIATELY ON FIRST CLICK
+}
+
+/* decide if intro/cutscene should run */
+const seenIntro = localStorage.getItem("vg_seen_intro")==="1";
+
+if(seenIntro){
+  skipIntroShowIdle();
+}else{
+  runFirstTimeIntro();
+}
+
+/* SHOP LOGIC */
 function updateShopUI(){
   const skin=SKINS[shopIndex];
   shopSkinImage.src=skin.icon;
@@ -648,9 +1127,21 @@ shopButton.onclick=()=>{
   shopOverlay.style.display="flex";
   updateShopUI();
 };
-shopClose.onclick=()=>{shopOverlay.style.display="none";};
-shopPrev.onclick=()=>{shopIndex=(shopIndex-1+SKINS.length)%SKINS.length; updateShopUI();};
-shopNext.onclick=()=>{shopIndex=(shopIndex+1)%SKINS.length; updateShopUI();};
+
+shopClose.onclick=()=>{
+  shopOverlay.style.display="none";
+};
+
+shopPrev.onclick=()=>{
+  shopIndex=(shopIndex-1+SKINS.length)%SKINS.length;
+  updateShopUI();
+};
+
+shopNext.onclick=()=>{
+  shopIndex=(shopIndex+1)%SKINS.length;
+  updateShopUI();
+};
+
 shopActionBtn.onclick=()=>{
   const skin=SKINS[shopIndex];
   if(skin.unlocked){
@@ -659,90 +1150,19 @@ shopActionBtn.onclick=()=>{
     applyCurrentSkin(false,false);
     updateShopUI();
   }else{
-    if(window.bananasTotal>=skin.price){
+    if(bananasTotal>=skin.price){
       bananasTotal-=skin.price;
-      localStorage.setItem("vg_bananas",String(bananasTotal));
       bananaText.textContent="Bananas: "+bananasTotal;
+      localStorage.setItem("vg_bananas",String(bananasTotal));
       skin.unlocked=true;
-      if(!ownedSkins.includes(skin.id)){ownedSkins.push(skin.id);localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));}
+      if(!ownedSkins.includes(skin.id)){
+        ownedSkins.push(skin.id);
+        localStorage.setItem("vg_owned_skins",JSON.stringify(ownedSkins));
+      }
       updateShopUI();
     }
   }
 };
-
-/* =========================
-   INTRO SYSTEM
-========================= */
-player.style.display="none";
-scoreEl.style.display="none";
-heartsEl.style.display="none";
-
-function runIntro(){
-  allowInput=false;
-  setTimeout(()=>{
-    player.style.display="block";
-    scoreEl.style.display="block";
-    heartsEl.style.display="block";
-    allowInput=true;
-  },3500);
-}
-runIntro();
-
-/* =========================
-   RESTART SYSTEM
-========================= */
-restartBtn.onclick=()=>{
-  planes.forEach(p=>p.remove()); planes=[];
-  bananas.forEach(b=>b.remove()); bananas=[];
-  y=window.innerHeight/2; velocity=0;
-  score=0; lives=3; safeFrames=0;
-  started=false; running=false; paused=false;
-  allowInput=false;
-  applyCurrentSkin(false,false);
-  player.style.top=y+"px"; player.style.display="block";
-  updateHearts();
-  scoreEl.textContent="Score: 0"; 
-  pauseBtn.style.display="block"; 
-  allowInput=true;
-  requestAnimationFrame(gameLoop);
-};
-
-/* =========================
-   PAUSE BUTTON
-========================= */
-pauseBtn.onclick=()=>{
-  if(!running) return;
-  paused=!paused;
-  pauseBtn.innerHTML=paused
-    ? '<i class="fa-solid fa-play" style="color: rgb(30, 48, 80);"></i>'
-    : '<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
-  if(!paused) requestAnimationFrame(gameLoop);
-};
-
-/* =========================
-   HEARTS UPDATE
-========================= */
-function updateHearts(){
-  heartsEl.textContent="❤️".repeat(lives);
-}
-
-/* =========================
-   BANANA COLLECT
-========================= */
-function collectBanana(){
-  bananasTotal++;
-  localStorage.setItem("vg_bananas",String(bananasTotal));
-  bananaText.textContent="Bananas: "+bananasTotal;
-}
-
-/* =========================
-   FINAL GAME INIT
-========================= */
-allowInput=true;
-applyCurrentSkin(false,false);
-updateHearts();
-
 </script>
 </body>
 </html>
-
