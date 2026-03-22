@@ -35,40 +35,6 @@ img{
   background:#3aa0ff;
 }
 
-/* INTRO ANIMATIONS */
-#gorillaIntro{
-  position:absolute;
-  width:240px;
-  bottom:-220px;
-  left:-220px;
-  transform:rotate(25deg);
-  opacity:0;
-  animation:flyIntro 4s ease-out forwards;
-  animation-delay:0.3s;
-}
-@keyframes flyIntro{
-  0%{bottom:-220px;left:-220px;opacity:1;}
-  100%{bottom:100vh;left:100vw;opacity:0;}
-}
-
-#vanillaText{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
-  font-size:3.2rem;
-  color:#fff;
-  opacity:0;
-  animation:vanillaSpin 2.5s ease-out forwards;
-  animation-delay:2s;
-}
-@keyframes vanillaSpin{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
-  30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
-  60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
-}
-
 /* OVERLAY */
 #overlay{
   position:absolute;
@@ -80,24 +46,17 @@ img{
   text-align:center;
   color:#fff;
   font-size:1.6rem;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity 0.6s;
+  opacity:1;
+  pointer-events:auto;
   z-index:5;
 }
-
-#skipBtn{
-  position:absolute;
-  bottom:15px;
-  right:15px;
-  padding:8px 14px;
-  background:rgba(0,0,0,0.7);
-  color:#fff;
-  border:2px solid #fff;
-  border-radius:4px;
-  cursor:pointer;
-  z-index:6;
-  display:none;
+#overlayText{
+  padding:10px 20px;
+}
+#overlayHint{
+  margin-top:10px;
+  font-size:1rem;
+  opacity:0.8;
 }
 
 /* GAME LAYER */
@@ -105,7 +64,7 @@ img{
   position:absolute;
   inset:0;
   background:#3aa0ff;
-  display:none;
+  display:block;
   overflow:hidden;
   z-index:3;
 }
@@ -371,11 +330,12 @@ img{
 <body>
 
 <div id="scene">
-  <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
-  <div id="vanillaText">VANILLA GORILLA</div>
-
-  <div id="overlay">Survive the skies.</div>
-  <button id="skipBtn">Skip</button>
+  <div id="overlay">
+    <div>
+      <div id="overlayText">Survive the skies.</div>
+      <div id="overlayHint">Tap / click / space to start</div>
+    </div>
+  </div>
 
   <div id="gameLayer">
     <div id="worldStack">
@@ -390,7 +350,7 @@ img{
 
         <div id="hearts">❤️❤️❤️</div>
 
-        <div id="pauseBtn">
+        <div id="pauseBtn" class="ui">
           <i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>
         </div>
 
@@ -405,12 +365,12 @@ img{
           <p id="scoreLine">Score: 0</p>
           <p id="bestScoreLine">Best Score: 0</p>
           <p id="bananaLine">Bananas: 0</p>
-          <button id="restartBtn">Go again</button>
+          <button id="restartBtn" class="ui">Go again</button>
         </div>
 
         <div id="deathGround"></div>
 
-        <img id="shopButton" src="images/shop-removebg-preview.png">
+        <img id="shopButton" class="ui" src="images/shop-removebg-preview.png">
       </div>
 
     </div>
@@ -419,16 +379,16 @@ img{
   <!-- SHOP -->
   <div id="shopOverlay">
     <div id="shopPanel">
-      <div id="shopClose">X</div>
+      <div id="shopClose" class="ui">X</div>
       <div id="shopTitle">Gorilla Skins</div>
 
-      <div id="shopPrev" class="shop-arrow">&lt;</div>
-      <div id="shopNext" class="shop-arrow">&gt;</div>
+      <div id="shopPrev" class="shop-arrow ui">&lt;</div>
+      <div id="shopNext" class="shop-arrow ui">&gt;</div>
 
       <img id="shopSkinImage" src="">
       <div id="shopInfo"></div>
       <div id="shopLock"></div>
-      <button id="shopActionBtn"></button>
+      <button id="shopActionBtn" class="ui"></button>
     </div>
   </div>
 
@@ -436,7 +396,6 @@ img{
 
 <script>
 const overlay=document.getElementById("overlay");
-const skipBtn=document.getElementById("skipBtn");
 const gameLayer=document.getElementById("gameLayer");
 const worldStack=document.getElementById("worldStack");
 const gameWorld=document.getElementById("gameWorld");
@@ -473,8 +432,13 @@ if (!isPC) {
 let y=window.innerHeight/2;
 let velocity=0;
 
-let flapStrength = isPC ? -8.0 : -6.6;
-let gravity = isPC ? 0.205 : 0.25;
+let baseFlapStrengthPC=-8.0;
+let baseFlapStrengthMobile=-6.6;
+let baseGravityPC=0.205;
+let baseGravityMobile=0.25;
+
+let flapStrength = isPC ? baseFlapStrengthPC : baseFlapStrengthMobile;
+let gravity = isPC ? baseGravityPC : baseGravityMobile;
 
 let started=false,running=false,paused=false;
 let planes=[];
@@ -493,6 +457,9 @@ let frameCounter=0;
 
 let planePassCount=0;
 let inMegaWave=false;
+let megaWaveActive=false;
+let firstMegaDone=false;
+let lastMegaScoreTrigger=0;
 
 const SKINS=[
   {
@@ -537,7 +504,7 @@ function applyCurrentSkin(falling=false,dead=false){
   }else if(falling){
     player.src=skin.fall;
     if(skin.id==="spider"){
-      player.style.transform="translateY(-50%) rotate(180deg)";
+      player.style.transformOrigin="center center";
     }
   }else{
     player.src=skin.fly;
@@ -547,16 +514,20 @@ function applyCurrentSkin(falling=false,dead=false){
 applyCurrentSkin(false,false);
 
 document.addEventListener("keydown",e=>{
-  if(["Space","ArrowUp","KeyW"].includes(e.code)) flap();
+  if(["Space","ArrowUp","KeyW"].includes(e.code)) flap(e);
 });
-document.addEventListener("mousedown",flap);
-document.addEventListener("touchstart",e=>{e.preventDefault();flap();});
+document.addEventListener("mousedown",e=>flap(e));
+document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
 
-function flap(){
+function flap(e){
+  if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
+
   if(!running){
     startGameplay();
+    return;
   }
   if(paused)return;
+
   started=true;
   velocity=flapStrength;
 }
@@ -582,8 +553,15 @@ function flashBonus(text,color="yellow"){
   setTimeout(()=>b.remove(),1100);
 }
 
+function screenShake(){
+  document.body.style.transition="0s";
+  document.body.style.transform="translate(8px)";
+  setTimeout(()=>document.body.style.transform="translate(-8px)",60);
+  setTimeout(()=>document.body.style.transform="translate(0)",120);
+}
+
 function spawnPlane(isMega=false){
-  let maxPlanes=isMega?12:Math.min(7,2+Math.floor(safeFrames/350));
+  let maxPlanes=isMega?14:Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
 
   const plane=document.createElement("img");
@@ -663,19 +641,31 @@ function updateScoreDisplay(){
 }
 
 function startMegaWave(){
+  if(megaWaveActive) return;
+  megaWaveActive=true;
   inMegaWave=true;
+
   megaWaveBanner.style.display="block";
   megaWaveBanner.classList.add("mega-shake");
 
-  for(let i=0;i<8;i++){
+  let originalFlap=flapStrength;
+  let originalGrav=gravity;
+
+  flapStrength = originalFlap * 1.2;
+  gravity = originalGrav * 1.2;
+
+  for(let i=0;i<12;i++){
     setTimeout(()=>spawnPlane(true),i*120);
   }
 
   setTimeout(()=>{
     megaWaveBanner.style.display="none";
     megaWaveBanner.classList.remove("mega-shake");
+    flapStrength = originalFlap;
+    gravity = originalGrav;
     inMegaWave=false;
-  },2500);
+    megaWaveActive=false;
+  },3000);
 }
 
 function gameLoop(){
@@ -687,12 +677,13 @@ function gameLoop(){
   velocity+=gravity;
   y+=velocity;
 
+  let gorillaHeight = player.offsetHeight || 70;
   if(y<0){
     y=0;
     velocity=0;
   }
-  if(y>window.innerHeight-45){
-    y=window.innerHeight-45;
+  if(y>window.innerHeight-gorillaHeight+10){
+    y=window.innerHeight-gorillaHeight+10;
     triggerDeath();
     return;
   }
@@ -796,11 +787,6 @@ function gameLoop(){
       }
 
       planePassCount++;
-      if(planePassCount%125===0){
-        if(Math.random()<0.5 && !inMegaWave){
-          startMegaWave();
-        }
-      }
     }
 
     if(left<-250){
@@ -810,6 +796,7 @@ function gameLoop(){
     }
 
     if(hit(player,p)){
+      screenShake();
       lives--;
       updateHearts();
       p.remove();
@@ -846,6 +833,17 @@ function gameLoop(){
       scoreTimer=0;
       score++;
       updateScoreDisplay();
+
+      if(!firstMegaDone && score>=125){
+        firstMegaDone=true;
+        lastMegaScoreTrigger=125;
+        startMegaWave();
+      }else if(firstMegaDone && score>=125 && (score-125)%110===0 && score!==lastMegaScoreTrigger){
+        if(Math.random()<0.5){
+          lastMegaScoreTrigger=score;
+          startMegaWave();
+        }
+      }
     }
   }
 
@@ -857,10 +855,7 @@ function triggerDeath(){
   running=false;
   paused=false;
 
-  document.body.style.transition="0s";
-  document.body.style.transform="translate(10px)";
-  setTimeout(()=>document.body.style.transform="translate(-10px)",80);
-  setTimeout(()=>document.body.style.transform="translate(0)",160);
+  screenShake();
 
   applyCurrentSkin(true,false);
 
@@ -870,12 +865,12 @@ function triggerDeath(){
     player.style.top=y+"px";
     player.style.transform='translateY(-50%) rotate(15deg)';
     if(y<window.innerHeight+160)requestAnimationFrame(fall);
-    else startScrollDown();
+    else showDeathScreen();
   }
   fall();
 }
 
-function startScrollDown(){
+function showDeathScreen(){
   if(score>bestScore){
     bestScore=score;
     localStorage.setItem("vg_best_score",String(bestScore));
@@ -904,7 +899,7 @@ restartBtn.onclick=()=>{
     y=window.innerHeight/2;
     velocity=0;
     started=false;
-    running=true;
+    running=false;
     paused=false;
     score=0;
     scoreTimer=0;
@@ -918,6 +913,9 @@ restartBtn.onclick=()=>{
     frameCounter=0;
     planePassCount=0;
     inMegaWave=false;
+    megaWaveActive=false;
+    firstMegaDone=false;
+    lastMegaScoreTrigger=0;
 
     updateHearts();
 
@@ -936,12 +934,10 @@ restartBtn.onclick=()=>{
     scoreEl.style.color="#fff";
     scoreEl.textContent="Score: 0";
 
-    pauseBtn.style.display="block";
-    pauseBtn.innerHTML='<i class="fa-solid fa-pause" style="color: rgb(30, 48, 80);"></i>';
+    pauseBtn.style.display="none";
 
-    requestAnimationFrame(gameLoop);
-
-    setTimeout(()=>{worldStack.style.transition="transform 2s ease-in";},50);
+    overlay.style.opacity="1";
+    overlay.style.pointerEvents="auto";
   },900);
 };
 
@@ -954,23 +950,13 @@ pauseBtn.onclick=()=>{
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
-let cutsceneTimeout=null;
-
 function startGameplay(){
-  if(cutsceneTimeout!==null){
-    clearTimeout(cutsceneTimeout);
-    cutsceneTimeout=null;
-  }
-
   overlay.style.opacity="0";
   overlay.style.pointerEvents="none";
-  skipBtn.style.display="none";
 
-  gameLayer.style.display="block";
-  worldStack.style.transition="transform 0s";
-  worldStack.style.transform="translateY(0)";
-
-  started=false;running=true;paused=false;
+  started=false;
+  running=true;
+  paused=false;
   y=window.innerHeight/2;
   velocity=0;
   score=0;
@@ -985,6 +971,9 @@ function startGameplay(){
   frameCounter=0;
   planePassCount=0;
   inMegaWave=false;
+  megaWaveActive=false;
+  firstMegaDone=false;
+  lastMegaScoreTrigger=0;
 
   updateHearts();
   planes.forEach(p=>p.remove());planes=[];
@@ -1009,17 +998,6 @@ function startGameplay(){
 
   requestAnimationFrame(gameLoop);
 }
-
-function showCutscene(){
-  overlay.style.opacity="1";
-  overlay.style.pointerEvents="auto";
-  skipBtn.style.display="block";
-  setTimeout(startGameplay,4000);
-}
-
-skipBtn.onclick=()=>{startGameplay();};
-
-cutsceneTimeout=setTimeout(showCutscene,4500);
 
 /* SHOP LOGIC */
 function updateShopUI(){
