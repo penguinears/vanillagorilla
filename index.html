@@ -1142,11 +1142,10 @@ shopPrev.onclick=()=>{
 };
 
 shopNext.onclick=()=>{
-  shopIndex=(shopIndex+1)%SK
-  shopNext.onclick=()=>{
   shopIndex=(shopIndex+1)%SKINS.length;
   updateShopUI();
 };
+
 
 shopActionBtn.onclick=()=>{
   const skin=SKINS[shopIndex];
