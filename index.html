@@ -128,7 +128,7 @@ img{
   transform:translateY(-50%) rotate(0deg);
   transition:transform 0.06s linear;
   z-index:4;
-  display:none; /* HIDDEN UNTIL INTRO/CUTSCENE DONE OR AFTER FIRST TIME */
+  display:none; /* HIDDEN UNTIL INTRO/CUTSCENE DONE */
 }
 
 /* OBJECTS */
@@ -502,7 +502,7 @@ let inMegaWave=false;
 let megaWaveActive=false;
 let firstMegaDone=false;
 let lastMegaScoreTrigger=0;
-
+/* SKINS */
 const SKINS=[
   {
     id:"vanilla",
@@ -545,9 +545,6 @@ function applyCurrentSkin(falling=false,dead=false){
     player.src=skin.dead;
   }else if(falling){
     player.src=skin.fall;
-    if(skin.id==="spider"){
-      player.style.transformOrigin="center center";
-    }
   }else{
     player.src=skin.fly;
   }
@@ -555,6 +552,7 @@ function applyCurrentSkin(falling=false,dead=false){
 
 applyCurrentSkin(false,false);
 
+/* INPUT HANDLING */
 document.addEventListener("keydown",e=>{
   if(["Space","ArrowUp","KeyW"].includes(e.code)) flap(e);
 });
@@ -564,7 +562,7 @@ document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
 function flap(e){
   if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
   if(inDeathFall) return;
-  if(!allowInput) return; // BLOCK DURING INTRO, CUTSCENE, FALL, SCROLL, BEFORE RESTART
+  if(!allowInput) return;
 
   if(!running){
     startGameplay();
@@ -576,10 +574,12 @@ function flap(e){
   velocity=flapStrength;
 }
 
+/* HEARTS */
 function updateHearts(){
   heartsEl.textContent="❤️".repeat(lives);
 }
 
+/* BONUS TEXT */
 function flashBonus(text,color="yellow"){
   const b=document.createElement("div");
   b.textContent=text;
@@ -597,6 +597,7 @@ function flashBonus(text,color="yellow"){
   setTimeout(()=>b.remove(),1100);
 }
 
+/* SCREEN SHAKE */
 function screenShake(){
   document.body.style.transition="0s";
   document.body.style.transform="translate(8px)";
@@ -604,6 +605,7 @@ function screenShake(){
   setTimeout(()=>document.body.style.transform="translate(0)",120);
 }
 
+/* SPAWN PLANE */
 function spawnPlane(isMega=false){
   let maxPlanes=isMega?14:Math.min(7,2+Math.floor(safeFrames/350));
   if(planes.length>=maxPlanes)return;
@@ -636,6 +638,7 @@ function spawnPlane(isMega=false){
   planes.push(plane);
 }
 
+/* SPAWN BANANA */
 function spawnBanana(){
   const banana=document.createElement("img");
   banana.src="images/bbb-removebg-preview.png";
@@ -656,6 +659,7 @@ function spawnBanana(){
   bananas.push(banana);
 }
 
+/* COLLISIONS */
 function hit(a,b){
   const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
   const shrink=26;
@@ -674,6 +678,7 @@ function hitBanana(a,b){
            ar.top+shrink>br.bottom-shrink);
 }
 
+/* SCORE DISPLAY */
 function updateScoreDisplay(){
   if(score>bestScore){
     scoreEl.style.color="yellow";
@@ -684,6 +689,7 @@ function updateScoreDisplay(){
   }
 }
 
+/* MEGA WAVE */
 function startMegaWave(){
   if(megaWaveActive) return;
   megaWaveActive=true;
@@ -712,6 +718,7 @@ function startMegaWave(){
   },3000);
 }
 
+/* GAME LOOP */
 function gameLoop(){
   if(!running||paused)return;
 
@@ -878,7 +885,6 @@ function gameLoop(){
       score++;
       updateScoreDisplay();
 
-      // mega wave: first at 220, then 50% every +200
       if(!firstMegaDone && score>=220){
         firstMegaDone=true;
         lastMegaScoreTrigger=220;
@@ -895,13 +901,14 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
+/* DEATH */
 function triggerDeath(){
   if(!running)return;
   running=false;
   paused=false;
   started=false;
   inDeathFall=true;
-  allowInput=false; // NO INPUT DURING FALL OR SCROLL
+  allowInput=false;
 
   screenShake();
 
@@ -920,7 +927,7 @@ function triggerDeath(){
 
 function showDeathScreen(){
   inDeathFall=false;
-  allowInput=false; // STILL BLOCKED UNTIL RESTART BUTTON
+  allowInput=false;
 
   if(score>bestScore){
     bestScore=score;
@@ -940,8 +947,9 @@ function showDeathScreen(){
   worldStack.style.transform="translateY(-100vh)";
 }
 
+/* RESTART */
 restartBtn.onclick=()=>{
-  allowInput=false; // STILL BLOCKED DURING SCROLL BACK UP
+  allowInput=false;
 
   worldStack.style.transition="transform 1s ease-out";
   worldStack.style.transform="translateY(0)";
@@ -993,11 +1001,11 @@ restartBtn.onclick=()=>{
     overlay.style.opacity=0;
     overlay.style.pointerEvents="none";
 
-    // NOW WE'RE IDLE ON BLUE, GORILLA VISIBLE, WAITING FOR FIRST CLICK
     allowInput=true;
   },900);
 };
 
+/* PAUSE */
 pauseBtn.onclick=()=>{
   if(!running)return;
   paused=!paused;
@@ -1007,6 +1015,7 @@ pauseBtn.onclick=()=>{
   if(!paused) requestAnimationFrame(gameLoop);
 };
 
+/* START GAMEPLAY */
 function startGameplay(){
   overlay.style.opacity="0";
   overlay.style.pointerEvents="none";
@@ -1058,46 +1067,41 @@ function startGameplay(){
   requestAnimationFrame(gameLoop);
 }
 
-/* INTRO / CUTSCENE FLOW (FIRST TIME ONLY) */
+/* INTRO / CUTSCENE FLOW */
 function runFirstTimeIntro(){
-  allowInput=false;          // NO INPUT DURING INTRO
-  player.style.display="none"; // HIDE PLAYER DURING INTRO
+  allowInput=false;
+  player.style.display="none";
 
-  // after intro animations, show black cutscene
   setTimeout(()=>{
     overlayText.textContent="Survive the skies.";
     overlay.style.opacity=1;
-    overlay.style.pointerEvents="none";
-  },7000); // intro length
+  },7000);
 
-  // after cutscene, fade out, show player, allow first click
   setTimeout(()=>{
     overlay.style.opacity=0;
-    overlay.style.pointerEvents="none";
     player.style.display="block";
     player.style.top=y+"px";
-    player.style.transform="translateY(-50%) rotate(0deg)";
-    allowInput=true; // NOW FIRST CLICK CAN START GAME
+    allowInput=true;
     localStorage.setItem("vg_seen_intro","1");
-  },7000+2500);
+  },9500);
 }
 
-function skipIntroShowIdle(){
-  gorillaIntro.style.display="none";
-  vanillaText.style.display="none";
-  overlay.style.opacity=0;
-  overlay.style.pointerEvents="none";
-  player.style.display="block";
-  player.style.top=y+"px";
-  player.style.transform="translateY(-50%) rotate(0deg)";
-  allowInput=true; // CAN START GAME IMMEDIATELY ON FIRST CLICK
+function runIntroEveryTime(){
+  allowInput=false;
+  player.style.display="none";
+
+  setTimeout(()=>{
+    overlay.style.opacity=0;
+    player.style.display="block";
+    player.style.top=y+"px";
+    allowInput=true;
+  },7000);
 }
 
-/* decide if intro/cutscene should run */
 const seenIntro = localStorage.getItem("vg_seen_intro")==="1";
 
 if(seenIntro){
-  skipIntroShowIdle();
+  runIntroEveryTime();
 }else{
   runFirstTimeIntro();
 }
@@ -1138,6 +1142,8 @@ shopPrev.onclick=()=>{
 };
 
 shopNext.onclick=()=>{
+  shopIndex=(shopIndex+1)%SK
+  shopNext.onclick=()=>{
   shopIndex=(shopIndex+1)%SKINS.length;
   updateShopUI();
 };
