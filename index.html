@@ -71,7 +71,7 @@ img{
   100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
 }
 
-/* BLACK CUTSCENE OVERLAY (after intro) */
+/* BLACK CUTSCENE OVERLAY (first time only) */
 #overlay{
   position:absolute;
   inset:0;
@@ -82,7 +82,7 @@ img{
   text-align:center;
   color:#fff;
   font-size:1.6rem;
-  opacity:0;              /* hidden during intro */
+  opacity:0;
   pointer-events:none;
   z-index:7;
   transition:opacity 0.6s;
@@ -128,6 +128,7 @@ img{
   transform:translateY(-50%) rotate(0deg);
   transition:transform 0.06s linear;
   z-index:4;
+  display:none; /* HIDDEN UNTIL INTRO/CUTSCENE DONE OR AFTER FIRST TIME */
 }
 
 /* OBJECTS */
@@ -366,7 +367,7 @@ img{
   <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
   <div id="vanillaText">VANILLA GORILLA</div>
 
-  <!-- BLACK CUTSCENE (only first time) -->
+  <!-- BLACK CUTSCENE (first time only) -->
   <div id="overlay">
     <div id="overlayText">Survive the skies.</div>
   </div>
@@ -480,7 +481,7 @@ let gravity = isPC ? baseGravityPC : baseGravityMobile;
 
 let started=false,running=false,paused=false;
 let inDeathFall=false;
-let allowInput=false; // blocks play during intro/cutscene
+let allowInput=false; // NO INPUT UNTIL INTRO/CUTSCENE DONE OR AFTER RESTART
 
 let planes=[];
 let bananas=[];
@@ -563,7 +564,7 @@ document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
 function flap(e){
   if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
   if(inDeathFall) return;
-  if(!allowInput) return; // no play during intro/cutscene
+  if(!allowInput) return; // BLOCK DURING INTRO, CUTSCENE, FALL, SCROLL, BEFORE RESTART
 
   if(!running){
     startGameplay();
@@ -900,6 +901,7 @@ function triggerDeath(){
   paused=false;
   started=false;
   inDeathFall=true;
+  allowInput=false; // NO INPUT DURING FALL OR SCROLL
 
   screenShake();
 
@@ -918,6 +920,7 @@ function triggerDeath(){
 
 function showDeathScreen(){
   inDeathFall=false;
+  allowInput=false; // STILL BLOCKED UNTIL RESTART BUTTON
 
   if(score>bestScore){
     bestScore=score;
@@ -938,6 +941,8 @@ function showDeathScreen(){
 }
 
 restartBtn.onclick=()=>{
+  allowInput=false; // STILL BLOCKED DURING SCROLL BACK UP
+
   worldStack.style.transition="transform 1s ease-out";
   worldStack.style.transform="translateY(0)";
 
@@ -985,9 +990,10 @@ restartBtn.onclick=()=>{
 
     pauseBtn.style.display="none";
 
-    // after restart: no intro again, no cutscene, just idle until click
     overlay.style.opacity=0;
     overlay.style.pointerEvents="none";
+
+    // NOW WE'RE IDLE ON BLUE, GORILLA VISIBLE, WAITING FOR FIRST CLICK
     allowInput=true;
   },900);
 };
@@ -1052,23 +1058,26 @@ function startGameplay(){
   requestAnimationFrame(gameLoop);
 }
 
-/* CUTSCENE FLOW (only first time) */
+/* INTRO / CUTSCENE FLOW (FIRST TIME ONLY) */
 function runFirstTimeIntro(){
-  allowInput=false;
+  allowInput=false;          // NO INPUT DURING INTRO
+  player.style.display="none"; // HIDE PLAYER DURING INTRO
 
-  // intro already animates via CSS
-  // after intro, show black cutscene
+  // after intro animations, show black cutscene
   setTimeout(()=>{
     overlayText.textContent="Survive the skies.";
     overlay.style.opacity=1;
     overlay.style.pointerEvents="none";
-  },7000); // after intro animations
+  },7000); // intro length
 
-  // then fade black away and allow input
+  // after cutscene, fade out, show player, allow first click
   setTimeout(()=>{
     overlay.style.opacity=0;
     overlay.style.pointerEvents="none";
-    allowInput=true; // now first click can start game
+    player.style.display="block";
+    player.style.top=y+"px";
+    player.style.transform="translateY(-50%) rotate(0deg)";
+    allowInput=true; // NOW FIRST CLICK CAN START GAME
     localStorage.setItem("vg_seen_intro","1");
   },7000+2500);
 }
@@ -1078,7 +1087,10 @@ function skipIntroShowIdle(){
   vanillaText.style.display="none";
   overlay.style.opacity=0;
   overlay.style.pointerEvents="none";
-  allowInput=true; // can start game immediately on first click
+  player.style.display="block";
+  player.style.top=y+"px";
+  player.style.transform="translateY(-50%) rotate(0deg)";
+  allowInput=true; // CAN START GAME IMMEDIATELY ON FIRST CLICK
 }
 
 /* decide if intro/cutscene should run */
