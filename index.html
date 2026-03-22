@@ -82,18 +82,13 @@ img{
   text-align:center;
   color:#fff;
   font-size:1.6rem;
-  opacity:0;
+  opacity:1;              /* start fully black */
   pointer-events:none;
-  z-index:5;
+  z-index:7;
   transition:opacity 0.6s;
 }
 #overlayText{
   padding:10px 20px;
-}
-#overlayHint{
-  margin-top:10px;
-  font-size:1rem;
-  opacity:0.8;
 }
 
 /* GAME LAYER */
@@ -371,12 +366,9 @@ img{
   <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
   <div id="vanillaText">VANILLA GORILLA</div>
 
-  <!-- BLACK CUTSCENE -->
+  <!-- BLACK CUTSCENE (always hides intro) -->
   <div id="overlay">
-    <div>
-      <div id="overlayText">Survive the skies.</div>
-      <div id="overlayHint">Get ready...</div>
-    </div>
+    <div id="overlayText">Survive the skies.</div>
   </div>
 
   <div id="gameLayer">
@@ -1052,21 +1044,18 @@ function startGameplay(){
 /* CUTSCENE FLOW */
 function showCutscene(){
   overlay.style.opacity="1";
-  overlay.style.pointerEvents="auto";
-  document.getElementById("overlayHint").textContent="Survive the skies.";
+  overlay.style.pointerEvents="none";
+  document.getElementById("overlayText").textContent="Survive the skies.";
   setTimeout(()=>{
     overlay.style.opacity="0";
     overlay.style.pointerEvents="none";
-    // now blue sky, gorilla in place, but running=false so he stays still until first click
+    // now blue sky, gorilla in place, running=false so he stays still until first click
   },2500);
 }
 
-/* initial intro timing */
+/* initial intro timing: overlay already black, just keep it until intro done */
 setTimeout(()=>{
-  overlay.style.opacity="1";
-  overlay.style.pointerEvents="auto";
-},4500);
-setTimeout(()=>{
+  // after intro finishes, keep black for a moment then fade
   showCutscene();
 },7000);
 
