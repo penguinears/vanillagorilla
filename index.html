@@ -71,7 +71,7 @@ img{
   100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
 }
 
-/* BLACK CUTSCENE OVERLAY */
+/* BLACK CUTSCENE OVERLAY (after intro) */
 #overlay{
   position:absolute;
   inset:0;
@@ -82,7 +82,7 @@ img{
   text-align:center;
   color:#fff;
   font-size:1.6rem;
-  opacity:1;              /* start fully black */
+  opacity:0;              /* hidden during intro */
   pointer-events:none;
   z-index:7;
   transition:opacity 0.6s;
@@ -366,7 +366,7 @@ img{
   <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
   <div id="vanillaText">VANILLA GORILLA</div>
 
-  <!-- BLACK CUTSCENE (always hides intro) -->
+  <!-- BLACK CUTSCENE (only first time) -->
   <div id="overlay">
     <div id="overlayText">Survive the skies.</div>
   </div>
@@ -430,6 +430,10 @@ img{
 
 <script>
 const overlay=document.getElementById("overlay");
+const overlayText=document.getElementById("overlayText");
+const gorillaIntro=document.getElementById("gorillaIntro");
+const vanillaText=document.getElementById("vanillaText");
+
 const gameLayer=document.getElementById("gameLayer");
 const worldStack=document.getElementById("worldStack");
 const gameWorld=document.getElementById("gameWorld");
@@ -476,6 +480,8 @@ let gravity = isPC ? baseGravityPC : baseGravityMobile;
 
 let started=false,running=false,paused=false;
 let inDeathFall=false;
+let allowInput=false; // blocks play during intro/cutscene
+
 let planes=[];
 let bananas=[];
 let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
@@ -557,6 +563,7 @@ document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
 function flap(e){
   if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
   if(inDeathFall) return;
+  if(!allowInput) return; // no play during intro/cutscene
 
   if(!running){
     startGameplay();
@@ -870,11 +877,12 @@ function gameLoop(){
       score++;
       updateScoreDisplay();
 
-      if(!firstMegaDone && score>=125){
+      // mega wave: first at 220, then 50% every +200
+      if(!firstMegaDone && score>=220){
         firstMegaDone=true;
-        lastMegaScoreTrigger=125;
+        lastMegaScoreTrigger=220;
         startMegaWave();
-      }else if(firstMegaDone && score>=125 && (score-125)%110===0 && score!==lastMegaScoreTrigger){
+      }else if(firstMegaDone && score>=220 && (score-220)%200===0 && score!==lastMegaScoreTrigger){
         if(Math.random()<0.5){
           lastMegaScoreTrigger=score;
           startMegaWave();
@@ -977,7 +985,10 @@ restartBtn.onclick=()=>{
 
     pauseBtn.style.display="none";
 
-    showCutscene();
+    // after restart: no intro again, no cutscene, just idle until click
+    overlay.style.opacity=0;
+    overlay.style.pointerEvents="none";
+    allowInput=true;
   },900);
 };
 
@@ -1041,23 +1052,43 @@ function startGameplay(){
   requestAnimationFrame(gameLoop);
 }
 
-/* CUTSCENE FLOW */
-function showCutscene(){
-  overlay.style.opacity="1";
-  overlay.style.pointerEvents="none";
-  document.getElementById("overlayText").textContent="Survive the skies.";
+/* CUTSCENE FLOW (only first time) */
+function runFirstTimeIntro(){
+  allowInput=false;
+
+  // intro already animates via CSS
+  // after intro, show black cutscene
   setTimeout(()=>{
-    overlay.style.opacity="0";
+    overlayText.textContent="Survive the skies.";
+    overlay.style.opacity=1;
     overlay.style.pointerEvents="none";
-    // now blue sky, gorilla in place, running=false so he stays still until first click
-  },2500);
+  },7000); // after intro animations
+
+  // then fade black away and allow input
+  setTimeout(()=>{
+    overlay.style.opacity=0;
+    overlay.style.pointerEvents="none";
+    allowInput=true; // now first click can start game
+    localStorage.setItem("vg_seen_intro","1");
+  },7000+2500);
 }
 
-/* initial intro timing: overlay already black, just keep it until intro done */
-setTimeout(()=>{
-  // after intro finishes, keep black for a moment then fade
-  showCutscene();
-},7000);
+function skipIntroShowIdle(){
+  gorillaIntro.style.display="none";
+  vanillaText.style.display="none";
+  overlay.style.opacity=0;
+  overlay.style.pointerEvents="none";
+  allowInput=true; // can start game immediately on first click
+}
+
+/* decide if intro/cutscene should run */
+const seenIntro = localStorage.getItem("vg_seen_intro")==="1";
+
+if(seenIntro){
+  skipIntroShowIdle();
+}else{
+  runFirstTimeIntro();
+}
 
 /* SHOP LOGIC */
 function updateShopUI(){
