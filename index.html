@@ -35,7 +35,43 @@ img{
   background:#3aa0ff;
 }
 
-/* OVERLAY */
+/* INTRO ANIMATIONS */
+#gorillaIntro{
+  position:absolute;
+  width:240px;
+  bottom:-220px;
+  left:-220px;
+  transform:rotate(25deg);
+  opacity:0;
+  animation:flyIntro 4s ease-out forwards;
+  animation-delay:0.3s;
+  z-index:6;
+}
+@keyframes flyIntro{
+  0%{bottom:-220px;left:-220px;opacity:1;}
+  100%{bottom:100vh;left:100vw;opacity:0;}
+}
+
+#vanillaText{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);
+  font-size:3.2rem;
+  color:#fff;
+  opacity:0;
+  animation:vanillaSpin 2.5s ease-out forwards;
+  animation-delay:2s;
+  z-index:6;
+}
+@keyframes vanillaSpin{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.1) rotate(-180deg);}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(10deg);}
+  60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(0.9) rotate(20deg);}
+}
+
+/* BLACK CUTSCENE OVERLAY */
 #overlay{
   position:absolute;
   inset:0;
@@ -46,9 +82,10 @@ img{
   text-align:center;
   color:#fff;
   font-size:1.6rem;
-  opacity:1;
-  pointer-events:auto;
+  opacity:0;
+  pointer-events:none;
   z-index:5;
+  transition:opacity 0.6s;
 }
 #overlayText{
   padding:10px 20px;
@@ -330,10 +367,15 @@ img{
 <body>
 
 <div id="scene">
+  <!-- INTRO -->
+  <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
+  <div id="vanillaText">VANILLA GORILLA</div>
+
+  <!-- BLACK CUTSCENE -->
   <div id="overlay">
     <div>
       <div id="overlayText">Survive the skies.</div>
-      <div id="overlayHint">Tap / click / space to start</div>
+      <div id="overlayHint">Get ready...</div>
     </div>
   </div>
 
@@ -441,6 +483,7 @@ let flapStrength = isPC ? baseFlapStrengthPC : baseFlapStrengthMobile;
 let gravity = isPC ? baseGravityPC : baseGravityMobile;
 
 let started=false,running=false,paused=false;
+let inDeathFall=false;
 let planes=[];
 let bananas=[];
 let planeSpawnTimer=0,safeFrames=0,score=0,scoreTimer=0,lives=3;
@@ -521,6 +564,7 @@ document.addEventListener("touchstart",e=>{e.preventDefault();flap(e);});
 
 function flap(e){
   if(e && e.target && e.target.classList && e.target.classList.contains("ui")) return;
+  if(inDeathFall) return;
 
   if(!running){
     startGameplay();
@@ -854,6 +898,8 @@ function triggerDeath(){
   if(!running)return;
   running=false;
   paused=false;
+  started=false;
+  inDeathFall=true;
 
   screenShake();
 
@@ -871,6 +917,8 @@ function triggerDeath(){
 }
 
 function showDeathScreen(){
+  inDeathFall=false;
+
   if(score>bestScore){
     bestScore=score;
     localStorage.setItem("vg_best_score",String(bestScore));
@@ -901,6 +949,7 @@ restartBtn.onclick=()=>{
     started=false;
     running=false;
     paused=false;
+    inDeathFall=false;
     score=0;
     scoreTimer=0;
     safeFrames=0;
@@ -936,8 +985,7 @@ restartBtn.onclick=()=>{
 
     pauseBtn.style.display="none";
 
-    overlay.style.opacity="1";
-    overlay.style.pointerEvents="auto";
+    showCutscene();
   },900);
 };
 
@@ -957,6 +1005,8 @@ function startGameplay(){
   started=false;
   running=true;
   paused=false;
+  inDeathFall=false;
+
   y=window.innerHeight/2;
   velocity=0;
   score=0;
@@ -998,6 +1048,27 @@ function startGameplay(){
 
   requestAnimationFrame(gameLoop);
 }
+
+/* CUTSCENE FLOW */
+function showCutscene(){
+  overlay.style.opacity="1";
+  overlay.style.pointerEvents="auto";
+  document.getElementById("overlayHint").textContent="Survive the skies.";
+  setTimeout(()=>{
+    overlay.style.opacity="0";
+    overlay.style.pointerEvents="none";
+    // now blue sky, gorilla in place, but running=false so he stays still until first click
+  },2500);
+}
+
+/* initial intro timing */
+setTimeout(()=>{
+  overlay.style.opacity="1";
+  overlay.style.pointerEvents="auto";
+},4500);
+setTimeout(()=>{
+  showCutscene();
+},7000);
 
 /* SHOP LOGIC */
 function updateShopUI(){
