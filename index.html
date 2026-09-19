@@ -1,5 +1,6 @@
 /* Only god knows why this works and its very delicite so dont mess with it to much! I have labeled every section of code and what is does for my future self to! 
 leo-2026 */
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,7 +58,7 @@ img{
     background:#3aa0ff;
 }
 
-/* INTRO  */
+/* INTRO */
 
 #gorillaIntro{
     position:absolute;
@@ -184,11 +185,11 @@ img{
 
 #player{
     position:absolute;
-    width:100px;
+    width:115px;
     left:150px;
     top:50%;
     transform:translateY(-50%) rotate(0deg);
-    transition:transform 0.04s linear;
+    transition:transform 0.06s linear;
     z-index:4;
     display:none;
 }
@@ -197,7 +198,7 @@ img{
 
 .plane{
     position:absolute;
-    width:120px;
+    width:150px;
     height:auto;
     z-index:3;
 }
@@ -215,10 +216,11 @@ img{
     position:absolute;
     top:50%;
     left:50%;
-    width:min(92vw,650px);
-    max-width:92vw;
+    width:92vw;
+    max-width:650px;
     height:auto;
     max-height:45vh;
+    max-height:45dvh;
     object-fit:contain;
     transform:translate(-50%,-50%);
     z-index:8;
@@ -483,12 +485,12 @@ img{
 @media(max-width:420px){
 
     #player{
-        width:64px;
+        width:92px;
         left:18vw;
     }
 
     .plane{
-        width:82px;
+        width:125px;
     }
 
     .banana{
@@ -498,6 +500,7 @@ img{
     #megaWaveBanner{
         width:90vw;
         max-height:38vh;
+        max-height:38dvh;
     }
 
     #shopPanel{
@@ -521,6 +524,7 @@ img{
     #shopSkinImage{
         width:110px;
         max-height:28vh;
+        max-height:28dvh;
     }
 
     #deathText{
@@ -534,21 +538,23 @@ img{
 @media(max-height:500px) and (orientation:landscape){
 
     #player{
-        width:58px;
+        width:82px;
     }
 
     .plane{
-        width:85px;
+        width:125px;
     }
 
     #megaWaveBanner{
         width:65vw;
         max-height:65vh;
+        max-height:65dvh;
     }
 
     #shopSkinImage{
         width:100px;
         max-height:25vh;
+        max-height:25dvh;
     }
 
 }
@@ -582,19 +588,37 @@ img{
                 <div id="score">Score: 0</div>
 
                 <div id="bananaCount">
+
                     <img src="images/bbb-removebg-preview.png">
-                    <span id="bananaText">Bananas: 0</span>
+
+                    <span id="bananaText">
+                        Bananas: 0
+                    </span>
+
                 </div>
 
-                <div id="hearts">❤️❤️❤️</div>
+                <div id="hearts">
+                    ❤️❤️❤️
+                </div>
 
                 <div id="pauseBtn" class="ui">
-                    <i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>
+
+                    <i
+                        class="fa-solid fa-pause"
+                        style="color:rgb(30,48,80);"
+                    ></i>
+
                 </div>
 
-                <img id="player" src="images/gor2-removebg-preview.png">
+                <img
+                    id="player"
+                    src="images/gor2-removebg-preview.png"
+                >
 
-                <img id="megaWaveBanner" src="images/meg-removebg-preview.png">
+                <img
+                    id="megaWaveBanner"
+                    src="images/meg-removebg-preview.png"
+                >
 
             </div>
 
@@ -604,19 +628,31 @@ img{
 
                     <h1>YOU DIED</h1>
 
-                    <p id="scoreLine">Score: 0</p>
+                    <p id="scoreLine">
+                        Score: 0
+                    </p>
 
-                    <p id="bestScoreLine">Best Score: 0</p>
+                    <p id="bestScoreLine">
+                        Best Score: 0
+                    </p>
 
-                    <p id="bananaLine">Bananas: 0</p>
+                    <p id="bananaLine">
+                        Bananas: 0
+                    </p>
 
-                    <button id="restartBtn" class="ui">Go again</button>
+                    <button id="restartBtn" class="ui">
+                        Go again
+                    </button>
 
                 </div>
 
                 <div id="deathGround"></div>
 
-                <img id="shopButton" class="ui" src="images/shop-removebg-preview.png">
+                <img
+                    id="shopButton"
+                    class="ui"
+                    src="images/shop-removebg-preview.png"
+                >
 
             </div>
 
@@ -630,13 +666,21 @@ img{
 
         <div id="shopPanel">
 
-            <div id="shopClose" class="ui">X</div>
+            <div id="shopClose" class="ui">
+                X
+            </div>
 
-            <div id="shopTitle">Gorilla Skins</div>
+            <div id="shopTitle">
+                Gorilla Skins
+            </div>
 
-            <div id="shopPrev" class="shop-arrow ui">&lt;</div>
+            <div id="shopPrev" class="shop-arrow ui">
+                &lt;
+            </div>
 
-            <div id="shopNext" class="shop-arrow ui">&gt;</div>
+            <div id="shopNext" class="shop-arrow ui">
+                &gt;
+            </div>
 
             <img id="shopSkinImage" src="">
 
@@ -658,44 +702,78 @@ const overlay = document.getElementById("overlay");
 const overlayText = document.getElementById("overlayText");
 const gorillaIntro = document.getElementById("gorillaIntro");
 const vanillaText = document.getElementById("vanillaText");
+
 const gameLayer = document.getElementById("gameLayer");
 const worldStack = document.getElementById("worldStack");
 const gameWorld = document.getElementById("gameWorld");
 const player = document.getElementById("player");
+
 const scoreEl = document.getElementById("score");
 const heartsEl = document.getElementById("hearts");
+
 const restartBtn = document.getElementById("restartBtn");
 const pauseBtn = document.getElementById("pauseBtn");
+
 const scoreLine = document.getElementById("scoreLine");
 const bestScoreLine = document.getElementById("bestScoreLine");
+
 const bananaText = document.getElementById("bananaText");
 const bananaLine = document.getElementById("bananaLine");
-const megaWaveBanner = document.getElementById("megaWaveBanner");
-const shopButton = document.getElementById("shopButton");
-const shopOverlay = document.getElementById("shopOverlay");
-const shopSkinImage = document.getElementById("shopSkinImage");
-const shopInfo = document.getElementById("shopInfo");
-const shopLock = document.getElementById("shopLock");
-const shopActionBtn = document.getElementById("shopActionBtn");
-const shopPrev = document.getElementById("shopPrev");
-const shopNext = document.getElementById("shopNext");
-const shopClose = document.getElementById("shopClose");
 
-const isPC = !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const megaWaveBanner =
+    document.getElementById("megaWaveBanner");
+
+const shopButton =
+    document.getElementById("shopButton");
+
+const shopOverlay =
+    document.getElementById("shopOverlay");
+
+const shopSkinImage =
+    document.getElementById("shopSkinImage");
+
+const shopInfo =
+    document.getElementById("shopInfo");
+
+const shopLock =
+    document.getElementById("shopLock");
+
+const shopActionBtn =
+    document.getElementById("shopActionBtn");
+
+const shopPrev =
+    document.getElementById("shopPrev");
+
+const shopNext =
+    document.getElementById("shopNext");
+
+const shopClose =
+    document.getElementById("shopClose");
+
+const isPC =
+    !/Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+    );
+
+/* PLAYER SIZE */
 
 function setPlayerSize(){
 
     if(!isPC){
 
         player.style.width =
-            window.innerWidth <= 420 ? "64px" : "70px";
+            window.innerWidth <= 420
+                ? "92px"
+                : "105px";
 
         player.style.left =
-            window.innerWidth <= 420 ? "18vw" : "90px";
+            window.innerWidth <= 420
+                ? "18vw"
+                : "90px";
 
     }else{
 
-        player.style.width = "100px";
+        player.style.width = "115px";
         player.style.left = "150px";
 
     }
@@ -704,52 +782,65 @@ function setPlayerSize(){
 
 setPlayerSize();
 
+/* GAME MOVEMENT */
+
 let y = window.innerHeight / 2;
 let velocity = 0;
 
-let baseFlapStrengthPC = -8.8;
-let baseFlapStrengthMobile = -7.6;
+/* Kept close to the original movement so it doesn't
+   become twitchy or annoying. */
+
+let baseFlapStrengthPC = -8.0;
+let baseFlapStrengthMobile = -6.6;
 
 let baseGravityPC = 0.205;
 let baseGravityMobile = 0.25;
 
-let flapStrength = isPC
-    ? baseFlapStrengthPC
-    : baseFlapStrengthMobile;
+let flapStrength =
+    isPC
+        ? baseFlapStrengthPC
+        : baseFlapStrengthMobile;
 
-let gravity = isPC
-    ? baseGravityPC
-    : baseGravityMobile;
+let gravity =
+    isPC
+        ? baseGravityPC
+        : baseGravityMobile;
 
-let started = false,
-    running = false,
-    paused = false;
+let started = false;
+let running = false;
+let paused = false;
 
 let inDeathFall = false;
-
 let allowInput = false;
 
 let planes = [];
 let bananas = [];
 
-let planeSpawnTimer = 0,
-    safeFrames = 0,
-    score = 0,
-    scoreTimer = 0,
-    lives = 3;
+let planeSpawnTimer = 0;
+let safeFrames = 0;
+let score = 0;
+let scoreTimer = 0;
+let lives = 3;
 
-let middleTimer = 0,
-    diveFrames = 0;
+let middleTimer = 0;
+let diveFrames = 0;
 
 let bananaSpawnTimer = 0;
 
 let bestScore =
-    parseInt(localStorage.getItem("vg_best_score") || "0",10);
+    parseInt(
+        localStorage.getItem("vg_best_score") || "0",
+        10
+    );
 
 let bananasTotal =
-    parseInt(localStorage.getItem("vg_bananas") || "0",10);
+    parseInt(
+        localStorage.getItem("vg_bananas") || "0",
+        10
+    );
 
-bananaText.textContent = "Bananas: " + bananasTotal;
+bananaText.textContent =
+    "Bananas: " + bananasTotal;
 
 let comboCount = 0;
 let lastGapFrame = 0;
@@ -760,6 +851,8 @@ let inMegaWave = false;
 let megaWaveActive = false;
 let firstMegaDone = false;
 let lastMegaScoreTrigger = 0;
+
+/* SKINS */
 
 const SKINS = [
 
@@ -804,7 +897,8 @@ SKINS.forEach(s => {
 });
 
 let currentSkinId =
-    localStorage.getItem("vg_current_skin") || "vanilla";
+    localStorage.getItem("vg_current_skin")
+    || "vanilla";
 
 if(!ownedSkins.includes(currentSkinId)){
     currentSkinId = "vanilla";
@@ -812,14 +906,21 @@ if(!ownedSkins.includes(currentSkinId)){
 
 function getCurrentSkin(){
 
-    return SKINS.find(s => s.id === currentSkinId)
-        || SKINS[0];
+    return (
+        SKINS.find(
+            s => s.id === currentSkinId
+        )
+        || SKINS[0]
+    );
 
 }
 
 let shopIndex = 0;
 
-function applyCurrentSkin(falling=false,dead=false){
+function applyCurrentSkin(
+    falling=false,
+    dead=false
+){
 
     const skin = getCurrentSkin();
 
@@ -832,7 +933,10 @@ function applyCurrentSkin(falling=false,dead=false){
         player.src = skin.fall;
 
         if(skin.id === "spider"){
-            player.style.transformOrigin = "center center";
+
+            player.style.transformOrigin =
+                "center center";
+
         }
 
     }else{
@@ -845,41 +949,220 @@ function applyCurrentSkin(falling=false,dead=false){
 
 applyCurrentSkin(false,false);
 
-window.addEventListener("resize",() => {
+/* REMOVE TRANSPARENT SPACE FROM SHIP.PNG */
 
-    setPlayerSize();
+function trimTransparentImage(img){
 
-    if(!running && !inDeathFall){
-        y = window.innerHeight / 2;
-        player.style.top = y + "px";
+    if(img.dataset.trimmed === "1"){
+        return;
     }
 
-});
+    if(!img.complete || !img.naturalWidth){
+        return;
+    }
 
-document.addEventListener("keydown",e => {
+    img.dataset.trimmed = "1";
 
-    if(["Space","ArrowUp","KeyW"].includes(e.code)){
-        e.preventDefault();
+    const canvas =
+        document.createElement("canvas");
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const width = img.naturalWidth;
+    const height = img.naturalHeight;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.drawImage(
+        img,
+        0,
+        0,
+        width,
+        height
+    );
+
+    let data;
+
+    try{
+
+        data =
+            ctx.getImageData(
+                0,
+                0,
+                width,
+                height
+            ).data;
+
+    }catch(e){
+
+        return;
+
+    }
+
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
+
+    for(let yy=0;yy<height;yy++){
+
+        for(let xx=0;xx<width;xx++){
+
+            const alpha =
+                data[
+                    (yy * width + xx) * 4 + 3
+                ];
+
+            if(alpha > 10){
+
+                if(xx < minX) minX = xx;
+                if(xx > maxX) maxX = xx;
+                if(yy < minY) minY = yy;
+                if(yy > maxY) maxY = yy;
+
+            }
+
+        }
+
+    }
+
+    if(maxX < minX || maxY < minY){
+        return;
+    }
+
+    const cropWidth =
+        maxX - minX + 1;
+
+    const cropHeight =
+        maxY - minY + 1;
+
+    if(
+        cropWidth === width &&
+        cropHeight === height
+    ){
+        return;
+    }
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        cropWidth,
+        cropHeight
+    );
+
+    ctx.drawImage(
+        img,
+        minX,
+        minY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+    );
+
+    try{
+
+        img.src =
+            canvas.toDataURL("image/png");
+
+    }catch(e){
+
+        img.dataset.trimmed = "0";
+
+    }
+
+}
+
+function preparePlane(plane){
+
+    plane.addEventListener(
+        "load",
+        function(){
+
+            trimTransparentImage(plane);
+
+        },
+        {once:false}
+    );
+
+    if(plane.complete){
+        trimTransparentImage(plane);
+    }
+
+}
+
+/* RESIZE */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        setPlayerSize();
+
+        if(!running && !inDeathFall){
+
+            y =
+                window.innerHeight / 2;
+
+            player.style.top =
+                y + "px";
+
+        }
+
+    }
+);
+
+/* INPUT */
+
+document.addEventListener(
+    "keydown",
+    e => {
+
+        if(
+            ["Space","ArrowUp","KeyW"]
+                .includes(e.code)
+        ){
+
+            e.preventDefault();
+
+            flap(e);
+
+        }
+
+    }
+);
+
+document.addEventListener(
+    "mousedown",
+    e => {
+
         flap(e);
+
     }
+);
 
-});
+document.addEventListener(
+    "touchstart",
+    e => {
 
-document.addEventListener("mousedown",e => {
+        if(e.target.closest(".ui")){
+            return;
+        }
 
-    flap(e);
+        e.preventDefault();
 
-});
+        flap(e);
 
-document.addEventListener("touchstart",e => {
-
-    if(e.target.closest(".ui")) return;
-
-    e.preventDefault();
-
-    flap(e);
-
-},{passive:false});
+    },
+    {passive:false}
+);
 
 function flap(e){
 
@@ -912,95 +1195,163 @@ function flap(e){
 
 }
 
+/* HEARTS */
+
 function updateHearts(){
 
-    heartsEl.textContent = "❤️".repeat(lives);
+    heartsEl.textContent =
+        "❤️".repeat(lives);
 
 }
 
-function flashBonus(text,color="yellow"){
+/* BONUS TEXT */
 
-    const b = document.createElement("div");
+function flashBonus(
+    text,
+    color="yellow"
+){
+
+    const b =
+        document.createElement("div");
 
     b.textContent = text;
 
-    b.style.position = "absolute";
-    b.style.left = "18%";
-    b.style.top = (y - 40) + "px";
-    b.style.color = color;
-    b.style.fontSize = "clamp(1rem,5vw,1.4rem)";
-    b.style.fontWeight = "700";
-    b.style.zIndex = "10";
-    b.style.opacity = "1";
-    b.style.transition = "1s";
+    b.style.position =
+        "absolute";
+
+    b.style.left =
+        "18%";
+
+    b.style.top =
+        (y - 40) + "px";
+
+    b.style.color =
+        color;
+
+    b.style.fontSize =
+        "clamp(1rem,5vw,1.4rem)";
+
+    b.style.fontWeight =
+        "700";
+
+    b.style.zIndex =
+        "10";
+
+    b.style.opacity =
+        "1";
+
+    b.style.transition =
+        "1s";
 
     gameWorld.appendChild(b);
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        b.style.opacity = "0";
-        b.style.top = (y - 80) + "px";
+            b.style.opacity = "0";
 
-    },50);
+            b.style.top =
+                (y - 80) + "px";
 
-    setTimeout(() => b.remove(),1100);
+        },
+        50
+    );
+
+    setTimeout(
+        () => b.remove(),
+        1100
+    );
 
 }
+
+/* SCREEN SHAKE */
 
 function screenShake(){
 
-    document.body.style.transition = "0s";
+    document.body.style.transition =
+        "0s";
 
-    document.body.style.transform = "translate(8px)";
+    document.body.style.transform =
+        "translate(8px)";
 
-    setTimeout(() => {
-        document.body.style.transform = "translate(-8px)";
-    },60);
+    setTimeout(
+        () => {
 
-    setTimeout(() => {
-        document.body.style.transform = "translate(0)";
-    },120);
+            document.body.style.transform =
+                "translate(-8px)";
+
+        },
+        60
+    );
+
+    setTimeout(
+        () => {
+
+            document.body.style.transform =
+                "translate(0)";
+
+        },
+        120
+    );
 
 }
+
+/* PLANES / SHIPS */
 
 function spawnPlane(isMega=false){
 
     let maxPlanes =
         isMega
             ? 14
-            : Math.min(7,2 + Math.floor(safeFrames / 350));
+            : Math.min(
+                7,
+                2 + Math.floor(
+                    safeFrames / 350
+                )
+            );
 
-    if(planes.length >= maxPlanes) return;
+    if(
+        planes.length >= maxPlanes
+    ){
+        return;
+    }
 
-    const plane = document.createElement("img");
+    const plane =
+        document.createElement("img");
 
-    plane.src = "images/ship.png";
+    plane.src =
+        "images/ship.png";
 
-    plane.className = "plane";
+    plane.className =
+        "plane";
 
     /*
-     * Most ships can appear anywhere,
-     * but some are deliberately placed near
-     * the top so staying at the top is not safe.
+     * Ships can now spawn in the upper part
+     * of the screen as well, meaning staying
+     * at the very top isn't a safe strategy.
      */
-
-    const topSpawn =
-        Math.random() < 0.38;
 
     let yPos;
 
-    if(topSpawn){
+    if(Math.random() < 0.45){
 
         const topLimit =
-            Math.max(90,window.innerHeight * 0.30);
+            Math.max(
+                120,
+                window.innerHeight * 0.38
+            );
 
         yPos =
-            10 + Math.random() *
-            Math.max(20,topLimit - 10);
+            Math.random() *
+            Math.max(
+                40,
+                topLimit - 10
+            ) +
+            10;
 
     }else{
 
-        const minY = 25;
+        const minY = 20;
 
         const maxY =
             Math.max(
@@ -1009,55 +1360,82 @@ function spawnPlane(isMega=false){
             );
 
         yPos =
-            Math.random() * (maxY - minY) + minY;
+            Math.random() *
+            (maxY - minY) +
+            minY;
 
     }
 
-    plane.style.top = yPos + "px";
+    plane.style.top =
+        yPos + "px";
 
-    plane.style.left = window.innerWidth + "px";
+    plane.style.left =
+        window.innerWidth + "px";
 
     plane.style.width =
         isPC
-            ? "120px"
-            : (window.innerWidth <= 420 ? "82px" : "90px");
+            ? "150px"
+            : (
+                window.innerWidth <= 420
+                    ? "125px"
+                    : "135px"
+            );
 
     let baseSpeed;
 
     if(isMega){
 
-        baseSpeed = 3.4 + Math.random() * 5.2;
+        baseSpeed =
+            3.4 +
+            Math.random() * 5.2;
 
     }else{
 
         baseSpeed =
-            2.8 +
-            Math.random() * 2.8 +
-            Math.min(3.2,safeFrames / 300);
+            2.4 +
+            Math.random() * 2.6 +
+            Math.min(
+                3.0,
+                safeFrames / 300
+            );
 
     }
 
     if(!isPC){
-        baseSpeed *= 0.86;
+
+        baseSpeed *= 0.82;
+
     }else{
+
         baseSpeed *= 1.18;
+
     }
 
-    plane.dataset.speed = baseSpeed;
+    plane.dataset.speed =
+        baseSpeed;
 
-    gameWorld.appendChild(plane);
+    gameWorld.appendChild(
+        plane
+    );
 
     planes.push(plane);
 
+    preparePlane(plane);
+
 }
+
+/* BANANAS */
 
 function spawnBanana(){
 
-    const banana = document.createElement("img");
+    const banana =
+        document.createElement("img");
 
-    banana.src = "images/bbb-removebg-preview.png";
+    banana.src =
+        "images/bbb-removebg-preview.png";
 
-    banana.className = "banana";
+    banana.className =
+        "banana";
 
     const minY = 60;
 
@@ -1068,45 +1446,62 @@ function spawnBanana(){
         );
 
     let yPos =
-        Math.random() * (maxY - minY) + minY;
+        Math.random() *
+        (maxY - minY) +
+        minY;
 
-    banana.style.top = yPos + "px";
+    banana.style.top =
+        yPos + "px";
 
-    banana.style.left = window.innerWidth + "px";
+    banana.style.left =
+        window.innerWidth + "px";
 
     let speed =
-        2.9 +
-        Math.random() * 1.3 +
-        Math.min(2.2,safeFrames / 350);
+        2.6 +
+        Math.random() * 1.2 +
+        Math.min(
+            2.0,
+            safeFrames / 350
+        );
 
     if(!isPC){
-        speed *= 0.88;
+
+        speed *= 0.8;
+
     }
 
-    banana.dataset.speed = speed;
+    banana.dataset.speed =
+        speed;
 
-    gameWorld.appendChild(banana);
+    gameWorld.appendChild(
+        banana
+    );
 
     bananas.push(banana);
 
 }
 
-/*
- * Tighter collision box for the ship.
- * This ignores more of the transparent space
- * around ship.png.
- */
+/* COLLISION */
 
 function hit(a,b){
 
-    const ar = a.getBoundingClientRect();
-    const br = b.getBoundingClientRect();
+    const ar =
+        a.getBoundingClientRect();
 
-    const playerPadX = ar.width * 0.16;
-    const playerPadY = ar.height * 0.16;
+    const br =
+        b.getBoundingClientRect();
 
-    const shipPadX = br.width * 0.28;
-    const shipPadY = br.height * 0.25;
+    const playerPadX =
+        ar.width * 0.10;
+
+    const playerPadY =
+        ar.height * 0.10;
+
+    const shipPadX =
+        br.width * 0.08;
+
+    const shipPadY =
+        br.height * 0.08;
 
     return !(
         ar.right - playerPadX <
@@ -1126,8 +1521,11 @@ function hit(a,b){
 
 function hitBanana(a,b){
 
-    const ar = a.getBoundingClientRect();
-    const br = b.getBoundingClientRect();
+    const ar =
+        a.getBoundingClientRect();
+
+    const br =
+        b.getBoundingClientRect();
 
     const shrink = 10;
 
@@ -1147,11 +1545,14 @@ function hitBanana(a,b){
 
 }
 
+/* SCORE */
+
 function updateScoreDisplay(){
 
     if(score > bestScore){
 
-        scoreEl.style.color = "yellow";
+        scoreEl.style.color =
+            "yellow";
 
         scoreEl.innerHTML =
             '<i class="fa-solid fa-crown" style="color:rgb(255,212,59);margin-right:6px;"></i> Score: ' +
@@ -1159,61 +1560,93 @@ function updateScoreDisplay(){
 
     }else{
 
-        scoreEl.style.color = "#fff";
+        scoreEl.style.color =
+            "#fff";
 
-        scoreEl.textContent = "Score: " + score;
+        scoreEl.textContent =
+            "Score: " + score;
 
     }
 
 }
 
+/* MEGA WAVE */
+
 function startMegaWave(){
 
-    if(megaWaveActive) return;
+    if(megaWaveActive){
+        return;
+    }
 
     megaWaveActive = true;
 
     inMegaWave = true;
 
-    megaWaveBanner.style.display = "block";
+    megaWaveBanner.style.display =
+        "block";
 
-    megaWaveBanner.classList.add("mega-shake");
+    megaWaveBanner.classList.add(
+        "mega-shake"
+    );
 
-    let originalFlap = flapStrength;
-    let originalGrav = gravity;
+    let originalFlap =
+        flapStrength;
 
-    flapStrength = originalFlap * 1.2;
-    gravity = originalGrav * 1.2;
+    let originalGrav =
+        gravity;
+
+    flapStrength =
+        originalFlap * 1.2;
+
+    gravity =
+        originalGrav * 1.2;
 
     for(let i=0;i<12;i++){
 
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            spawnPlane(true);
+                spawnPlane(true);
 
-        },i * 120);
+            },
+            i * 120
+        );
 
     }
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        megaWaveBanner.style.display = "none";
+            megaWaveBanner.style.display =
+                "none";
 
-        megaWaveBanner.classList.remove("mega-shake");
+            megaWaveBanner.classList.remove(
+                "mega-shake"
+            );
 
-        flapStrength = originalFlap;
-        gravity = originalGrav;
+            flapStrength =
+                originalFlap;
 
-        inMegaWave = false;
-        megaWaveActive = false;
+            gravity =
+                originalGrav;
 
-    },3000);
+            inMegaWave = false;
+
+            megaWaveActive = false;
+
+        },
+        3000
+    );
 
 }
 
+/* MAIN GAME LOOP */
+
 function gameLoop(){
 
-    if(!running || paused) return;
+    if(!running || paused){
+        return;
+    }
 
     frameCounter++;
     safeFrames++;
@@ -1228,6 +1661,7 @@ function gameLoop(){
     if(y < 0){
 
         y = 0;
+
         velocity = 0;
 
     }
@@ -1250,16 +1684,22 @@ function gameLoop(){
 
     }
 
-    player.style.top = y + "px";
+    player.style.top =
+        y + "px";
 
-    let tiltVel = velocity * 0.65;
+    let tiltVel =
+        velocity * 0.65;
 
-    let angle = tiltVel * 3.1;
+    let angle =
+        tiltVel * 3.1;
 
     angle =
         Math.max(
             -32,
-            Math.min(32,angle)
+            Math.min(
+                32,
+                angle
+            )
         );
 
     player.style.transform =
@@ -1272,14 +1712,22 @@ function gameLoop(){
         diveFrames++;
 
         if(diveFrames > 12){
-            applyCurrentSkin(true,false);
+
+            applyCurrentSkin(
+                true,
+                false
+            );
+
         }
 
     }else{
 
         diveFrames = 0;
 
-        applyCurrentSkin(false,false);
+        applyCurrentSkin(
+            false,
+            false
+        );
 
     }
 
@@ -1302,7 +1750,9 @@ function gameLoop(){
 
                 score += 2;
 
-                flashBonus("CENTER +2");
+                flashBonus(
+                    "CENTER +2"
+                );
 
                 middleTimer = 0;
 
@@ -1330,7 +1780,8 @@ function gameLoop(){
             planeSpawnTimer >
             Math.max(
                 44,
-                125 - safeFrames / 10
+                125 -
+                safeFrames / 10
             )
         ){
 
@@ -1349,33 +1800,52 @@ function gameLoop(){
 
         bananaSpawnTimer++;
 
-        if(bananaSpawnTimer > 120){
+        if(
+            bananaSpawnTimer > 120
+        ){
 
             bananaSpawnTimer = 0;
 
             if(Math.random() < 0.7){
+
                 spawnBanana();
+
             }
 
         }
 
     }
 
-    if(frameCounter - lastGapFrame > 180){
+    if(
+        frameCounter -
+        lastGapFrame >
+        180
+    ){
 
         comboCount = 0;
 
     }
 
-    for(let i=planes.length-1;i>=0;i--){
+    /* SHIP MOVEMENT */
+
+    for(
+        let i = planes.length - 1;
+        i >= 0;
+        i--
+    ){
 
         const p = planes[i];
 
         let left =
-            parseFloat(p.style.left) -
-            parseFloat(p.dataset.speed);
+            parseFloat(
+                p.style.left
+            ) -
+            parseFloat(
+                p.dataset.speed
+            );
 
-        p.style.left = left + "px";
+        p.style.left =
+            left + "px";
 
         if(
             left < 150 &&
@@ -1385,10 +1855,13 @@ function gameLoop(){
 
             p.bonusGiven = true;
 
-            const gorCenter = y;
+            const gorCenter =
+                y;
 
             const planeCenter =
-                parseFloat(p.style.top) +
+                parseFloat(
+                    p.style.top
+                ) +
                 p.offsetHeight / 2;
 
             const gap =
@@ -1438,7 +1911,8 @@ function gameLoop(){
 
                 comboCount++;
 
-                lastGapFrame = frameCounter;
+                lastGapFrame =
+                    frameCounter;
 
                 if(comboCount === 3){
 
@@ -1449,7 +1923,9 @@ function gameLoop(){
                         "lime"
                     );
 
-                }else if(comboCount === 5){
+                }else if(
+                    comboCount === 5
+                ){
 
                     score += 10;
 
@@ -1472,11 +1948,14 @@ function gameLoop(){
 
         }
 
-        if(left < -250){
+        if(left < -300){
 
             p.remove();
 
-            planes.splice(i,1);
+            planes.splice(
+                i,
+                1
+            );
 
             continue;
 
@@ -1492,7 +1971,10 @@ function gameLoop(){
 
             p.remove();
 
-            planes.splice(i,1);
+            planes.splice(
+                i,
+                1
+            );
 
             comboCount = 0;
 
@@ -1508,21 +1990,35 @@ function gameLoop(){
 
     }
 
-    for(let i=bananas.length-1;i>=0;i--){
+    /* BANANA MOVEMENT */
+
+    for(
+        let i = bananas.length - 1;
+        i >= 0;
+        i--
+    ){
 
         const b = bananas[i];
 
         let left =
-            parseFloat(b.style.left) -
-            parseFloat(b.dataset.speed);
+            parseFloat(
+                b.style.left
+            ) -
+            parseFloat(
+                b.dataset.speed
+            );
 
-        b.style.left = left + "px";
+        b.style.left =
+            left + "px";
 
         if(left < -200){
 
             b.remove();
 
-            bananas.splice(i,1);
+            bananas.splice(
+                i,
+                1
+            );
 
             continue;
 
@@ -1538,7 +2034,8 @@ function gameLoop(){
             );
 
             bananaText.textContent =
-                "Bananas: " + bananasTotal;
+                "Bananas: " +
+                bananasTotal;
 
             flashBonus(
                 "+1 banana",
@@ -1547,11 +2044,16 @@ function gameLoop(){
 
             b.remove();
 
-            bananas.splice(i,1);
+            bananas.splice(
+                i,
+                1
+            );
 
         }
 
     }
+
+    /* SCORE TIMER / MEGA WAVE */
 
     if(started){
 
@@ -1572,7 +2074,8 @@ function gameLoop(){
 
                 firstMegaDone = true;
 
-                lastMegaScoreTrigger = 220;
+                lastMegaScoreTrigger =
+                    220;
 
                 startMegaWave();
 
@@ -1585,7 +2088,8 @@ function gameLoop(){
 
                 if(Math.random() < 0.5){
 
-                    lastMegaScoreTrigger = score;
+                    lastMegaScoreTrigger =
+                        score;
 
                     startMegaWave();
 
@@ -1597,13 +2101,19 @@ function gameLoop(){
 
     }
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
+/* DEATH */
+
 function triggerDeath(){
 
-    if(!running) return;
+    if(!running){
+        return;
+    }
 
     running = false;
     paused = false;
@@ -1613,7 +2123,10 @@ function triggerDeath(){
 
     screenShake();
 
-    applyCurrentSkin(true,false);
+    applyCurrentSkin(
+        true,
+        false
+    );
 
     let dv = 0;
 
@@ -1623,7 +2136,8 @@ function triggerDeath(){
 
         y += dv;
 
-        player.style.top = y + "px";
+        player.style.top =
+            y + "px";
 
         player.style.transform =
             'translateY(-50%) rotate(15deg)';
@@ -1633,7 +2147,9 @@ function triggerDeath(){
             window.innerHeight + 160
         ){
 
-            requestAnimationFrame(fall);
+            requestAnimationFrame(
+                fall
+            );
 
         }else{
 
@@ -1646,6 +2162,8 @@ function triggerDeath(){
     fall();
 
 }
+
+/* DEATH SCREEN */
 
 function showDeathScreen(){
 
@@ -1665,16 +2183,20 @@ function showDeathScreen(){
     }
 
     const msgs = [
+
         "You died L bozo",
         "How r u so bad",
         "My grandma can play better than u"
+
     ];
 
-    document.querySelector("#deathText h1")
-        .textContent =
+    document.querySelector(
+        "#deathText h1"
+    ).textContent =
         msgs[
             Math.floor(
-                Math.random() * msgs.length
+                Math.random() *
+                msgs.length
             )
         ];
 
@@ -1687,7 +2209,8 @@ function showDeathScreen(){
     bananaLine.textContent =
         "Bananas: " + bananasTotal;
 
-    player.style.display = "none";
+    player.style.display =
+        "none";
 
     worldStack.style.transition =
         "transform 2s ease-in";
@@ -1696,6 +2219,8 @@ function showDeathScreen(){
         "translateY(-100vh)";
 
 }
+
+/* RESTART */
 
 restartBtn.onclick = () => {
 
@@ -1707,97 +2232,125 @@ restartBtn.onclick = () => {
     worldStack.style.transform =
         "translateY(0)";
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        planes.forEach(p => p.remove());
-        planes = [];
+            planes.forEach(
+                p => p.remove()
+            );
 
-        bananas.forEach(b => b.remove());
-        bananas = [];
+            planes = [];
 
-        y = window.innerHeight / 2;
+            bananas.forEach(
+                b => b.remove()
+            );
 
-        velocity = 0;
+            bananas = [];
 
-        started = false;
-        running = false;
-        paused = false;
-        inDeathFall = false;
+            y =
+                window.innerHeight / 2;
 
-        score = 0;
-        scoreTimer = 0;
-        safeFrames = 0;
+            velocity = 0;
 
-        lives = 3;
+            started = false;
+            running = false;
+            paused = false;
+            inDeathFall = false;
 
-        middleTimer = 0;
-        diveFrames = 0;
-        bananaSpawnTimer = 0;
+            score = 0;
+            scoreTimer = 0;
+            safeFrames = 0;
 
-        comboCount = 0;
-        lastGapFrame = 0;
-        frameCounter = 0;
-        planePassCount = 0;
+            lives = 3;
 
-        inMegaWave = false;
-        megaWaveActive = false;
-        firstMegaDone = false;
-        lastMegaScoreTrigger = 0;
+            middleTimer = 0;
+            diveFrames = 0;
+            bananaSpawnTimer = 0;
 
-        updateHearts();
+            comboCount = 0;
+            lastGapFrame = 0;
+            frameCounter = 0;
+            planePassCount = 0;
 
-        applyCurrentSkin(false,false);
+            inMegaWave = false;
+            megaWaveActive = false;
+            firstMegaDone = false;
+            lastMegaScoreTrigger = 0;
 
-        player.style.display = "block";
+            updateHearts();
 
-        player.style.top = y + "px";
+            applyCurrentSkin(
+                false,
+                false
+            );
 
-        player.style.transform =
-            "translateY(-50%) rotate(0deg)";
+            player.style.display =
+                "block";
 
-        setPlayerSize();
+            player.style.top =
+                y + "px";
 
-        scoreEl.style.color = "#fff";
+            player.style.transform =
+                "translateY(-50%) rotate(0deg)";
 
-        scoreEl.textContent =
-            "Score: 0";
+            setPlayerSize();
 
-        pauseBtn.style.display = "none";
+            scoreEl.style.color =
+                "#fff";
 
-        overlay.style.opacity = 0;
+            scoreEl.textContent =
+                "Score: 0";
 
-        overlay.style.pointerEvents =
-            "none";
+            pauseBtn.style.display =
+                "none";
 
-        allowInput = true;
+            overlay.style.opacity =
+                0;
 
-    },900);
+            overlay.style.pointerEvents =
+                "none";
+
+            allowInput = true;
+
+        },
+        900
+    );
 
 };
 
+/* PAUSE */
+
 pauseBtn.onclick = () => {
 
-    if(!running) return;
+    if(!running){
+        return;
+    }
 
     paused = !paused;
 
-    pauseBtn.innerHTML = paused
+    pauseBtn.innerHTML =
+        paused
 
-        ? '<i class="fa-solid fa-play" style="color:rgb(30,48,80);"></i>'
+            ? '<i class="fa-solid fa-play" style="color:rgb(30,48,80);"></i>'
 
-        : '<i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>';
+            : '<i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>';
 
     if(!paused){
 
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(
+            gameLoop
+        );
 
     }
 
 };
 
+/* START GAME */
+
 function startGameplay(){
 
-    overlay.style.opacity = "0";
+    overlay.style.opacity =
+        "0";
 
     overlay.style.pointerEvents =
         "none";
@@ -1807,7 +2360,9 @@ function startGameplay(){
     paused = false;
     inDeathFall = false;
 
-    y = window.innerHeight / 2;
+    y =
+        window.innerHeight / 2;
+
     velocity = 0;
 
     score = 0;
@@ -1832,98 +2387,129 @@ function startGameplay(){
 
     updateHearts();
 
-    planes.forEach(p => p.remove());
+    planes.forEach(
+        p => p.remove()
+    );
+
     planes = [];
 
-    bananas.forEach(b => b.remove());
+    bananas.forEach(
+        b => b.remove()
+    );
+
     bananas = [];
 
-    scoreEl.style.color = "#fff";
+    scoreEl.style.color =
+        "#fff";
 
     scoreEl.textContent =
         "Score: 0";
 
-    applyCurrentSkin(false,false);
+    applyCurrentSkin(
+        false,
+        false
+    );
 
-    player.style.display = "block";
+    player.style.display =
+        "block";
 
-    player.style.top = y + "px";
+    player.style.top =
+        y + "px";
 
     player.style.transform =
         "translateY(-50%) rotate(0deg)";
 
     setPlayerSize();
 
-    pauseBtn.style.display = "block";
+    pauseBtn.style.display =
+        "block";
 
     pauseBtn.innerHTML =
         '<i class="fa-solid fa-pause" style="color:rgb(30,48,80);"></i>';
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
-/* INTRO / CUTSCENE FLOW */
+/* INTRO / CUTSCENE */
 
 function runFirstTimeIntro(){
 
     allowInput = false;
 
-    player.style.display = "none";
+    player.style.display =
+        "none";
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        overlayText.textContent =
-            "Survive the skies.";
+            overlayText.textContent =
+                "Survive the skies.";
 
-        overlay.style.opacity = 1;
+            overlay.style.opacity =
+                1;
 
-        overlay.style.pointerEvents =
-            "none";
+            overlay.style.pointerEvents =
+                "none";
 
-    },7000);
+        },
+        7000
+    );
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        overlay.style.opacity = 0;
+            overlay.style.opacity =
+                0;
 
-        overlay.style.pointerEvents =
-            "none";
+            overlay.style.pointerEvents =
+                "none";
 
-        player.style.display = "block";
+            player.style.display =
+                "block";
 
-        player.style.top = y + "px";
+            player.style.top =
+                y + "px";
 
-        player.style.transform =
-            "translateY(-50%) rotate(0deg)";
+            player.style.transform =
+                "translateY(-50%) rotate(0deg)";
 
-        setPlayerSize();
+            setPlayerSize();
 
-        allowInput = true;
+            allowInput = true;
 
-        localStorage.setItem(
-            "vg_seen_intro",
-            "1"
-        );
+            localStorage.setItem(
+                "vg_seen_intro",
+                "1"
+            );
 
-    },7000 + 2500);
+        },
+        7000 + 2500
+    );
 
 }
 
 function skipIntroShowIdle(){
 
-    gorillaIntro.style.display = "none";
+    gorillaIntro.style.display =
+        "none";
 
-    vanillaText.style.display = "none";
+    vanillaText.style.display =
+        "none";
 
-    overlay.style.opacity = 0;
+    overlay.style.opacity =
+        0;
 
     overlay.style.pointerEvents =
         "none";
 
-    player.style.display = "block";
+    player.style.display =
+        "block";
 
-    player.style.top = y + "px";
+    player.style.top =
+        y + "px";
 
     player.style.transform =
         "translateY(-50%) rotate(0deg)";
@@ -1935,7 +2521,9 @@ function skipIntroShowIdle(){
 }
 
 const seenIntro =
-    localStorage.getItem("vg_seen_intro") === "1";
+    localStorage.getItem(
+        "vg_seen_intro"
+    ) === "1";
 
 if(seenIntro){
 
@@ -1951,9 +2539,11 @@ if(seenIntro){
 
 function updateShopUI(){
 
-    const skin = SKINS[shopIndex];
+    const skin =
+        SKINS[shopIndex];
 
-    shopSkinImage.src = skin.icon;
+    shopSkinImage.src =
+        skin.icon;
 
     shopInfo.textContent =
         skin.name +
@@ -1963,21 +2553,27 @@ function updateShopUI(){
 
     if(skin.unlocked){
 
-        shopLock.textContent = "";
+        shopLock.textContent =
+            "";
 
-        if(currentSkinId === skin.id){
+        if(
+            currentSkinId ===
+            skin.id
+        ){
 
             shopActionBtn.textContent =
                 "Equipped";
 
-            shopActionBtn.disabled = true;
+            shopActionBtn.disabled =
+                true;
 
         }else{
 
             shopActionBtn.textContent =
                 "Equip";
 
-            shopActionBtn.disabled = false;
+            shopActionBtn.disabled =
+                false;
 
         }
 
@@ -1989,7 +2585,8 @@ function updateShopUI(){
         shopActionBtn.textContent =
             "Buy";
 
-        shopActionBtn.disabled = false;
+        shopActionBtn.disabled =
+            false;
 
     }
 
@@ -1997,7 +2594,8 @@ function updateShopUI(){
 
 shopButton.onclick = () => {
 
-    shopOverlay.style.display = "flex";
+    shopOverlay.style.display =
+        "flex";
 
     updateShopUI();
 
@@ -2005,14 +2603,19 @@ shopButton.onclick = () => {
 
 shopClose.onclick = () => {
 
-    shopOverlay.style.display = "none";
+    shopOverlay.style.display =
+        "none";
 
 };
 
 shopPrev.onclick = () => {
 
     shopIndex =
-        (shopIndex - 1 + SKINS.length) %
+        (
+            shopIndex -
+            1 +
+            SKINS.length
+        ) %
         SKINS.length;
 
     updateShopUI();
@@ -2022,7 +2625,10 @@ shopPrev.onclick = () => {
 shopNext.onclick = () => {
 
     shopIndex =
-        (shopIndex + 1) %
+        (
+            shopIndex +
+            1
+        ) %
         SKINS.length;
 
     updateShopUI();
@@ -2031,29 +2637,39 @@ shopNext.onclick = () => {
 
 shopActionBtn.onclick = () => {
 
-    const skin = SKINS[shopIndex];
+    const skin =
+        SKINS[shopIndex];
 
     if(skin.unlocked){
 
-        currentSkinId = skin.id;
+        currentSkinId =
+            skin.id;
 
         localStorage.setItem(
             "vg_current_skin",
             currentSkinId
         );
 
-        applyCurrentSkin(false,false);
+        applyCurrentSkin(
+            false,
+            false
+        );
 
         updateShopUI();
 
     }else{
 
-        if(bananasTotal >= skin.price){
+        if(
+            bananasTotal >=
+            skin.price
+        ){
 
-            bananasTotal -= skin.price;
+            bananasTotal -=
+                skin.price;
 
             bananaText.textContent =
-                "Bananas: " + bananasTotal;
+                "Bananas: " +
+                bananasTotal;
 
             localStorage.setItem(
                 "vg_bananas",
@@ -2062,13 +2678,21 @@ shopActionBtn.onclick = () => {
 
             skin.unlocked = true;
 
-            if(!ownedSkins.includes(skin.id)){
+            if(
+                !ownedSkins.includes(
+                    skin.id
+                )
+            ){
 
-                ownedSkins.push(skin.id);
+                ownedSkins.push(
+                    skin.id
+                );
 
                 localStorage.setItem(
                     "vg_owned_skins",
-                    JSON.stringify(ownedSkins)
+                    JSON.stringify(
+                        ownedSkins
+                    )
                 );
 
             }
@@ -2085,4 +2709,3 @@ shopActionBtn.onclick = () => {
 
 </body>
 </html>
-
