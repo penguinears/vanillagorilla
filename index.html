@@ -566,7 +566,6 @@ img{
 
 <div id="scene">
 
-```
 <!-- INTRO -->
 
 <img id="gorillaIntro" src="images/gor1-removebg-preview.png">
@@ -581,82 +580,84 @@ img{
 
 <div id="gameLayer">
 
-    <div id="worldStack">
+```
+<div id="worldStack">
 
-        <div id="gameWorld">
+    <div id="gameWorld">
 
-            <div id="score">Score: 0</div>
+        <div id="score">Score: 0</div>
 
-            <div id="bananaCount">
+        <div id="bananaCount">
 
-                <img src="images/bbb-removebg-preview.png">
+            <img src="images/bbb-removebg-preview.png">
 
-                <span id="bananaText">
-                    Bananas: 0
-                </span>
-
-            </div>
-
-            <div id="hearts">
-                ❤️❤️❤️
-            </div>
-
-            <div id="pauseBtn" class="ui">
-
-                <i
-                    class="fa-solid fa-pause"
-                    style="color:rgb(30,48,80);"
-                ></i>
-
-            </div>
-
-            <img
-                id="player"
-                src="images/gor2-removebg-preview.png"
-            >
-
-            <img
-                id="megaWaveBanner"
-                src="images/meg-removebg-preview.png"
-            >
+            <span id="bananaText">
+                Bananas: 0
+            </span>
 
         </div>
 
-        <div id="deathScreen">
+        <div id="hearts">
+            ❤️❤️❤️
+        </div>
 
-            <div id="deathText">
+        <div id="pauseBtn" class="ui">
 
-                <h1>YOU DIED</h1>
-
-                <p id="scoreLine">
-                    Score: 0
-                </p>
-
-                <p id="bestScoreLine">
-                    Best Score: 0
-                </p>
-
-                <p id="bananaLine">
-                    Bananas: 0
-                </p>
-
-                <button id="restartBtn" class="ui">
-                    Go again
-                </button>
-
-            </div>
-
-            <div id="deathGround"></div>
-
-            <img
-                id="shopButton"
-                class="ui"
-                src="images/shop-removebg-preview.png"
-            >
+            <i
+                class="fa-solid fa-pause"
+                style="color:rgb(30,48,80);"
+            ></i>
 
         </div>
+
+        <img
+            id="player"
+            src="images/gor2-removebg-preview.png"
+        >
+
+        <img
+            id="megaWaveBanner"
+            src="images/meg-removebg-preview.png"
+        >
 
     </div>
+
+    <div id="deathScreen">
+
+        <div id="deathText">
+
+            <h1>YOU DIED</h1>
+
+            <p id="scoreLine">
+                Score: 0
+            </p>
+
+            <p id="bestScoreLine">
+                Best Score: 0
+            </p>
+
+            <p id="bananaLine">
+                Bananas: 0
+            </p>
+
+            <button id="restartBtn" class="ui">
+                Go again
+            </button>
+
+        </div>
+
+        <div id="deathGround"></div>
+
+        <img
+            id="shopButton"
+            class="ui"
+            src="images/shop-removebg-preview.png"
+        >
+
+    </div>
+
+</div>
+```
 
 </div>
 
@@ -664,36 +665,37 @@ img{
 
 <div id="shopOverlay">
 
-    <div id="shopPanel">
+```
+<div id="shopPanel">
 
-        <div id="shopClose" class="ui">
-            X
-        </div>
-
-        <div id="shopTitle">
-            Gorilla Skins
-        </div>
-
-        <div id="shopPrev" class="shop-arrow ui">
-            &lt;
-        </div>
-
-        <div id="shopNext" class="shop-arrow ui">
-            &gt;
-        </div>
-
-        <img id="shopSkinImage" src="">
-
-        <div id="shopInfo"></div>
-
-        <div id="shopLock"></div>
-
-        <button id="shopActionBtn" class="ui"></button>
-
+    <div id="shopClose" class="ui">
+        X
     </div>
+
+    <div id="shopTitle">
+        Gorilla Skins
+    </div>
+
+    <div id="shopPrev" class="shop-arrow ui">
+        &lt;
+    </div>
+
+    <div id="shopNext" class="shop-arrow ui">
+        &gt;
+    </div>
+
+    <img id="shopSkinImage" src="">
+
+    <div id="shopInfo"></div>
+
+    <div id="shopLock"></div>
+
+    <button id="shopActionBtn" class="ui"></button>
 
 </div>
 ```
+
+</div>
 
 </div>
 
@@ -1335,12 +1337,6 @@ function getSafePlaneY(){
                     other.style.left
                 );
 
-            /*
-             * Only worry about planes that are still
-             * near the spawning side. Planes far away
-             * cannot visually overlap the new plane.
-             */
-
             if(
                 isNaN(otherLeft) ||
                 otherLeft < window.innerWidth - 260
@@ -1372,13 +1368,6 @@ function getSafePlaneY(){
         }
 
     }
-
-    /*
-     * If the screen is already too crowded,
-     * don't create another plane.
-     * This guarantees planes don't spawn
-     * directly on top of each other.
-     */
 
     return null;
 
@@ -1424,11 +1413,6 @@ function spawnPlane(isMega=false){
     plane.style.left =
         window.innerWidth + "px";
 
-    /*
-     * Smaller than the previous version,
-     * especially on phones.
-     */
-
     plane.style.width =
         isPC
             ? "130px"
@@ -1467,12 +1451,6 @@ function spawnPlane(isMega=false){
         baseSpeed *= 1.18;
 
     }
-
-    /*
-     * Every plane gets its own speed.
-     * This stops every plane moving like
-     * an identical wall.
-     */
 
     const personalSpeed =
         0.88 +
@@ -1558,17 +1536,22 @@ function hit(a,b){
     const br =
         b.getBoundingClientRect();
 
+    /*
+     * Much smaller hitboxes so the player
+     * must actually get into the plane.
+     */
+
     const playerPadX =
-        ar.width * 0.10;
+        ar.width * 0.24;
 
     const playerPadY =
-        ar.height * 0.10;
+        ar.height * 0.22;
 
     const shipPadX =
-        br.width * 0.08;
+        br.width * 0.20;
 
     const shipPadY =
-        br.height * 0.08;
+        br.height * 0.18;
 
     return !(
         ar.right - playerPadX <
@@ -1755,20 +1738,17 @@ function gameLoop(){
         y + "px";
 
     /*
-     * STRONG GORILLA LEAN
-     *
-     * The physics stay quick and responsive,
-     * while the visual rotation is much stronger.
+     * Subtle gorilla lean.
      */
 
     let angle =
-        velocity * 7.2;
+        velocity * 3.2;
 
     angle =
         Math.max(
-            -55,
+            -28,
             Math.min(
-                55,
+                28,
                 angle
             )
         );
@@ -1906,10 +1886,6 @@ function gameLoop(){
     ){
 
         const p = planes[i];
-
-        /*
-         * Each plane has its own speed.
-         */
 
         let left =
             parseFloat(
