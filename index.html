@@ -67,6 +67,7 @@ img{
     opacity:0;
     animation:flyIntro 4s ease-out forwards;
     animation-delay:0.3s;
+    animation-play-state:paused;
     z-index:6;
 }
 
@@ -99,6 +100,7 @@ img{
     white-space:nowrap;
     animation:vanillaSpin 2.5s ease-out forwards;
     animation-delay:2s;
+    animation-play-state:paused;
     z-index:6;
 }
 
@@ -122,6 +124,30 @@ img{
         opacity:0;
         transform:translate(-50%,-50%) scale(0.9) rotate(20deg);
     }
+}
+
+/* START BUTTON */
+
+#startIntroBtn{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    z-index:20;
+    padding:14px 30px;
+    min-width:150px;
+    background:#111;
+    color:#fff;
+    border:3px solid #fff;
+    border-radius:5px;
+    font-size:1.25rem;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+#startIntroBtn:active{
+    transform:translate(-50%,-50%) scale(0.95);
 }
 
 /* BLACK CUTSCENE OVERLAY */
@@ -572,6 +598,10 @@ img{
 
 <div id="vanillaText">VANILLA GORILLA</div>
 
+<button id="startIntroBtn" class="ui">
+    START
+</button>
+
 <!-- BLACK CUTSCENE -->
 
 <div id="overlay">
@@ -580,7 +610,6 @@ img{
 
 <div id="gameLayer">
 
-```
 <div id="worldStack">
 
     <div id="gameWorld">
@@ -657,7 +686,6 @@ img{
     </div>
 
 </div>
-```
 
 </div>
 
@@ -665,7 +693,6 @@ img{
 
 <div id="shopOverlay">
 
-```
 <div id="shopPanel">
 
     <div id="shopClose" class="ui">
@@ -693,7 +720,6 @@ img{
     <button id="shopActionBtn" class="ui"></button>
 
 </div>
-```
 
 </div>
 
@@ -705,6 +731,7 @@ const overlay = document.getElementById("overlay");
 const overlayText = document.getElementById("overlayText");
 const gorillaIntro = document.getElementById("gorillaIntro");
 const vanillaText = document.getElementById("vanillaText");
+const startIntroBtn = document.getElementById("startIntroBtn");
 
 const gameLayer = document.getElementById("gameLayer");
 const worldStack = document.getElementById("worldStack");
@@ -758,6 +785,115 @@ const isPC =
         navigator.userAgent
     );
 
+/* FORCE LANDSCAPE */
+
+async function forceLandscape(){
+
+    if(!isPC){
+
+        try{
+
+            if(
+                !document.fullscreenElement &&
+                document.documentElement.requestFullscreen
+            ){
+
+                await document.documentElement.requestFullscreen();
+
+            }
+
+            if(
+                screen.orientation &&
+                screen.orientation.lock
+            ){
+
+                await screen.orientation.lock("landscape");
+
+            }
+
+        }catch(e){
+
+            console.log(
+                "Landscape/fullscreen unavailable:",
+                e
+            );
+
+        }
+
+    }
+
+}
+
+/* START INTRO */
+
+let introStarted = false;
+
+async function startIntro(){
+
+    if(introStarted){
+        return;
+    }
+
+    introStarted = true;
+
+    /*
+     * This runs directly from the button tap,
+     * which gives Android permission to request
+     * fullscreen and orientation lock.
+     */
+
+    await forceLandscape();
+
+    startIntroBtn.style.display = "none";
+
+    /*
+     * Force the animations to start only now.
+     */
+
+    gorillaIntro.style.animationPlayState = "running";
+    vanillaText.style.animationPlayState = "running";
+
+    /*
+     * Small delay so the gorilla animation begins
+     * cleanly after fullscreen/orientation changes.
+     */
+
+    setTimeout(
+        () => {
+
+            if(seenIntro){
+
+                skipIntroShowIdle();
+
+            }else{
+
+                runFirstTimeIntro();
+
+            }
+
+        },
+        100
+    );
+
+}
+
+startIntroBtn.addEventListener(
+    "click",
+    startIntro
+);
+
+startIntroBtn.addEventListener(
+    "touchend",
+    e => {
+
+        e.preventDefault();
+
+        startIntro();
+
+    },
+    {passive:false}
+);
+
 /* PLAYER SIZE */
 
 function setPlayerSize(){
@@ -789,8 +925,6 @@ setPlayerSize();
 
 let y = window.innerHeight / 2;
 let velocity = 0;
-
-/* Responsive but still close to the original */
 
 let baseFlapStrengthPC = -8.0;
 let baseFlapStrengthMobile = -7.4;
@@ -1300,11 +1434,6 @@ function screenShake(){
 
 /* PLANES / SHIPS */
 
-/*
- * Find a vertical position that is not too close
- * to another plane near the spawn side.
- */
-
 function getSafePlaneY(){
 
     const topMargin = 25;
@@ -1536,11 +1665,6 @@ function hit(a,b){
     const br =
         b.getBoundingClientRect();
 
-    /*
-     * Much smaller hitboxes so the player
-     * must actually get into the plane.
-     */
-
     const playerPadX =
         ar.width * 0.24;
 
@@ -1736,10 +1860,6 @@ function gameLoop(){
 
     player.style.top =
         y + "px";
-
-    /*
-     * Subtle gorilla lean.
-     */
 
     let angle =
         velocity * 3.2;
@@ -2190,10 +2310,6 @@ function triggerDeath(){
         player.style.top =
             y + "px";
 
-        /*
-         * Strong downward death lean.
-         */
-
         player.style.transform =
             'translateY(-50%) rotate(48deg)';
 
@@ -2223,7 +2339,6 @@ function triggerDeath(){
 function showDeathScreen(){
 
     inDeathFall = false;
-
     allowInput = false;
 
     if(score > bestScore){
@@ -2497,6 +2612,12 @@ function runFirstTimeIntro(){
     player.style.display =
         "none";
 
+    /*
+     * The gorilla and VANILLA GORILLA
+     * animations have already started from
+     * the START button.
+     */
+
     setTimeout(
         () => {
 
@@ -2580,15 +2701,11 @@ const seenIntro =
         "vg_seen_intro"
     ) === "1";
 
-if(seenIntro){
-
-    skipIntroShowIdle();
-
-}else{
-
-    runFirstTimeIntro();
-
-}
+/*
+ * Do NOT start the intro automatically.
+ * The START button must be tapped first so
+ * Android can grant fullscreen/orientation.
+ */
 
 /* SHOP LOGIC */
 
