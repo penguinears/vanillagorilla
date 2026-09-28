@@ -726,6 +726,43 @@ img{
 </div>
 
 <script>
+/* SOUNDTRACK */
+
+const soundtrackSongs = [
+    "soundtrack/alex-morgan-phonk-brazilian-phonk-phonk-music-545509.mp3",
+    "soundtrack/jonasblakewood-rock-583374.mp3",
+    "soundtrack/9jackjack8-concrete-breaker-phonk-trap-414908.mp3"
+];
+
+let soundtrackIndex = 0;
+
+const soundtrack = new Audio();
+soundtrack.volume = 0.4;
+soundtrack.loop = false;
+
+function playSoundtrack(){
+
+    if(!soundtrack.src){
+        soundtrack.src = soundtrackSongs[soundtrackIndex];
+    }
+
+    soundtrack.play().catch(() => {});
+
+}
+
+soundtrack.addEventListener("ended", () => {
+
+    soundtrackIndex++;
+
+    if(soundtrackIndex >= soundtrackSongs.length){
+        soundtrackIndex = 0;
+    }
+
+    soundtrack.src = soundtrackSongs[soundtrackIndex];
+
+    soundtrack.play().catch(() => {});
+
+});
 
 const overlay = document.getElementById("overlay");
 const overlayText = document.getElementById("overlayText");
